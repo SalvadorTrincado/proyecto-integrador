@@ -1,6 +1,7 @@
 package com.equipo.model.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,9 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 
-@Getter
-@Setter
-@ToString
+@Data
 public class DatosPersonalesDTO {
 
     @NotBlank

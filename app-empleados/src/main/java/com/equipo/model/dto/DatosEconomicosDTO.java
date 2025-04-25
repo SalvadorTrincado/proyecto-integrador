@@ -1,15 +1,14 @@
 package com.equipo.model.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-@ToString
+@Data
 public class DatosEconomicosDTO {
 
     @NotBlank(message = "El número de cuenta IBAN es obligatorio.")

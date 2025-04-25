@@ -2,15 +2,14 @@ package com.equipo.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import java.util.List;
 
-@Getter
-@Setter
-@ToString
+@Data
 public class DatosProfesionalesDTO {
 
     @NotBlank(message = "El departamento es obligatorio.")
