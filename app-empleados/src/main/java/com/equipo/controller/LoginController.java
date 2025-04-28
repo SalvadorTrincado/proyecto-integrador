@@ -1,4 +1,4 @@
-package com.autenticacion.controller;
+/* package com.equipo.controller;
 
 import com.autenticacion.model.LoginPaso1;
 import com.autenticacion.model.LoginPaso2;
@@ -76,3 +76,4 @@ public class LoginController {
         return "resumen";
     }
 }
+*/

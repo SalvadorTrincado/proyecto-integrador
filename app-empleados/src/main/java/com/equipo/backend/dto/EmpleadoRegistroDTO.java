@@ -1,5 +1,6 @@
 package com.equipo.backend.dto;
 
+import com.equipo.backend.entity.Empleado;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -18,4 +19,13 @@ public class EmpleadoRegistroDTO {
     private Double salarioBaseMensual;
     private Double complementoMensual;
     private String fechaIncorporacion;
+
+    public Empleado toEntity() {
+        Empleado empleado = new Empleado();
+        empleado.setNombre(this.nombre);
+        empleado.setTelefono(this.telefonoMovil);
+        empleado.setCorreo(this.documento);
+        empleado.setBajaLogica(false);
+        return empleado;
+    }
 }
