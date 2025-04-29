@@ -38,15 +38,13 @@ Proyecto Integrador - Requisitos Básicos
 - RegistroEmpleadoResumenController: GET /registro/empleado/resumen (Resumen)
 - RegistroEmpleadoResumenController: POST /registro/empleado/resumen (Guardar)
 - EtiquetadoController: GET y POST /empleados/etiquetado (Etiquetas subordinados)
-8. Credenciales de prueba:
-Usuario Administrador: miguel / miguel
-Usuario Empleado: salva@empresa.com / Salva1234.
-9. Instalación necesaria:
+
+8. Instalación necesaria:
 - Tener instalado IntelliJ IDEA.
 - Configurar Gradle y base de datos H2 persistente.
 - Ejecutar ./gradlew bootRun.
 - Acceso: http://localhost:8081/
-10. Explicaciones complementarias:
+9. Explicaciones complementarias:
 Proyecto dividido en:
 - app-empleados: Vistas, controladores, DTOs, JS, CSS.
 - app-seguridad: Seguridad, API REST, control accesos.
