@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
@@ -30,4 +31,12 @@ public class Usuario {
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String clave;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion;
+
+    @PrePersist
+    public void prePersist() {
+        this.fechaCreacion = LocalDateTime.now();
+    }
 }

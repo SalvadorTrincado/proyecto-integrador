@@ -5,11 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
-@Table
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,6 +25,5 @@ public class Etiqueta {
     private String nombre;
 
     @ManyToMany(mappedBy = "etiquetas")
-    private Set<Usuario> usuarios = new HashSet<>();
-
+    private List<Empleado> empleados; // Cambiado a List y a Empleado
 }

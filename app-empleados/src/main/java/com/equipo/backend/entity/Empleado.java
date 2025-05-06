@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table
@@ -27,11 +25,21 @@ public class Empleado {
     @ManyToOne
     private Empleado supervisor;
 
-    @OneToMany(mappedBy = "empleado")
-    private List<Colaboracion> solicitudes;
+    // Relación con Colaboracion (basándonos en los campos 'emisor' y 'receptor' en Colaboracion)
+    @OneToMany(mappedBy = "emisor")
+    private List<Colaboracion> colaboracionesEmitidas;
+
+    @OneToMany(mappedBy = "receptor")
+    private List<Colaboracion> colaboracionesRecibidas;
 
     @OneToMany(mappedBy = "empleado")
     private List<Nomina> nominas;
 
-    private Set<Etiqueta> etiquetas = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "empleado_etiqueta",
+            joinColumns = @JoinColumn(name = "empleado_id"),
+            inverseJoinColumns = @JoinColumn(name = "etiqueta_id")
+    )
+    private List<Etiqueta> etiquetas;
 }
