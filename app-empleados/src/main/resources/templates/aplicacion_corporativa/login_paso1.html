@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Autenticación - Paso 1</title>
+        <link rel="stylesheet" href="/css/login_paso1.css">
+    </head>
+    <body>
+        <h1>Autenticación - Paso 1: Introduzca su email</h1>
+
+        <form th:action="@{/autenticacion/paso1-post}" method="post" th:object="${loginPaso1DTO}">
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" th:field="*{email}" >
+                <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            <button type="submit">Siguiente</button>
+            <div class="error-message" th:if="${error != null}" th:text="${error}"></div>
+            <p>¿No tienes una cuenta? <a href="/resgistrar_usuario">Regístrate aquí</a></p>
+        </form>
+        <script>
+            // Aquí iría el JavaScript para recordar usuarios (opcional)
+        </script>
+    </body>
+    </html>

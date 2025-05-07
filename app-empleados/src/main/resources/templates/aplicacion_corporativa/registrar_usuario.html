@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro y Creación de Usuario</title>
+    <link rel="stylesheet" href="/css/crear_usuario.css">
+</head>
+<body>
+<div class="container">
+    <h1>Registro y Creación de Usuario</h1>
+
+    <div th:if="${error}" class="error-message">
+        <p th:text="${error}"></p>
+    </div>
+
+    <div th:if="${exito}" class="success-message">
+        <p th:text="${exito}"></p>
+    </div>
+
+    <form th:action="@{/resgistrar_usuario_post}" method="post" th:object="${usuarioRegistroDTO}">
+        <div class="form-group">
+            <label for="nombre">Nombre completo:</label>
+            <input type="text" id="nombre" th:field="*{nombre}" >
+            <div class="error-message" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Correo electrónico:</label>
+            <input type="email" id="email" th:field="*{email}" >
+            <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" th:field="*{password}" >
+            <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirmar contraseña:</label>
+            <input type="password" id="confirmPassword" th:field="*{confirmPassword}" >
+            <div class="error-message" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+        </div>
+
+        <button type="submit">Registrar Usuario</button>
+        <button type="reset">Limpiar Formulario</button>
+
+        <div id="registrationMessage" class="success-message" th:if="${mensaje != null}" th:text="${mensaje}"></div>
+        <div id="errorMessage" class="error-message general-error" th:if="${result != null and result.hasErrors()}">
+            <ul>
+                <li th:each="error : ${result.allErrors}" th:text="${error.defaultMessage}"></li>
+            </ul>
+        </div>
+        <p>¿Ya tienes una cuenta? <a href="/autenticacion/paso1">Iniciar Sesión</a></p>
+    </form>
+</div>
+</body>
+</html>

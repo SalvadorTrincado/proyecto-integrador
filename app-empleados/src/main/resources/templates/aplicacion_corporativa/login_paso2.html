@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación - Paso 2</title>
+    <link rel="stylesheet" href="/css/login_paso2.css"> </head>
+<body>
+<h1>Iniciar Sesión</h1>
+<h2>Introduce tu contraseña para el email: <span th:text="${emailPaso1}"></span></h2>
+
+<form method="post" th:action="@{/autenticacion/paso2-post}" th:object="${loginPaso2DTO}">
+    <div>
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" th:field="*{password}" >
+        <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+    </div>
+    <button type="submit">Iniciar Sesión</button>
+    <p><a href="/autenticacion/paso1">Volver para cambiar el email</a></p>
+    <p><a href="/recuperar_password">¿Olvidaste tu contraseña?</a></p>
+    <div class="error-message" th:if="${error != null}" th:text="${error}"></div>
+</form>
+
+</body>
+</html>
