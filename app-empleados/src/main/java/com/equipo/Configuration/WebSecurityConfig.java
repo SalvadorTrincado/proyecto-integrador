@@ -1,5 +1,6 @@
 package com.equipo.Configuration;
 
+import com.equipo.service.UserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,13 +19,10 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http, UserDetailService userDetailService) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         // Aquí podrías configurar usuarios en memoria si no quieres usar un servicio de usuario personalizado
-        // builder.inMemoryAuthentication()
-        //         .withUser("usuario")
-        //         .password(passwordEncoder().encode("contraseña"))
-        //         .roles("USER");
+        builder.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
         return builder.build();
     }
 
@@ -33,7 +31,7 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
-                                "/resgistrar_usuario",
+                                "/controller/**",
                                 "/registro/**",
                                 "/static/css/**", // Permitimos acceso sin autenticación a todos los archivos CSS
                                 "/js/**",
@@ -45,10 +43,12 @@ public class WebSecurityConfig {
                 )
                 .formLogin((form) -> form
                         .loginPage("/autenticacion/paso1")
-                        .permitAll()
                         .loginProcessingUrl("/autenticacion/paso2-post")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
                         .defaultSuccessUrl("/aplicacion_corporativa/area_personal", true)
                         .failureUrl("/autenticacion/paso2?error=true")
+                        .permitAll()
                 )
                 .logout((logout) -> logout
                         .permitAll()
