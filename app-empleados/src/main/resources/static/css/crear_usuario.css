@@ -1,3 +1,4 @@
+/* Estilo general del cuerpo */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f1de;
@@ -11,6 +12,7 @@ body {
     box-sizing: border-box;
 }
 
+/* Contenedor principal del formulario */
 .container {
     background-color: #dad7cd;
     padding: 30px;
@@ -18,14 +20,22 @@ body {
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
     width: 400px;
     max-width: 90%;
+    transition: transform 0.3s ease;
 }
 
-h1, h2 {
+.container:hover {
+    transform: translateY(-5px);
+}
+
+/* Títulos del formulario */
+h1 {
     color: #a3b18a;
     margin-bottom: 20px;
     text-align: center;
+    font-size: 2em;
 }
 
+/* Estilo de los campos del formulario */
 .form-group {
     margin-bottom: 20px;
 }
@@ -35,58 +45,91 @@ label {
     margin-bottom: 5px;
     color: #588157;
     font-weight: bold;
+    font-size: 1.05em;
 }
 
+/* Campos de entrada (email, contraseña, etc.) */
 input[type="email"],
 input[type="password"],
-input[type="text"], /* Añadido para el campo de nombre */
-input[type="file"]   /* Añadido para el campo de archivo */
-{
-    width: calc(100% - 12px);
+input[type="text"],
+input[type="file"] {
+    width: 100%;
     padding: 10px;
     border: 1px solid #a3b18a;
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 16px;
+    margin-top: 5px;
+    transition: border 0.3s ease;
 }
 
-button[type="submit"] {
-    background-color: #588157;
-    color: white;
+input:focus {
+    outline: none;
+    border-color: #588157;
+}
+
+/* Estilo de los botones */
+button[type="submit"],
+button[type="reset"] {
     padding: 12px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 18px;
-    transition: background-color 0.3s ease;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex: 1;
+}
+
+/* Botón de submit */
+button[type="submit"] {
+    background-color: #588157;
+    color: white;
 }
 
 button[type="submit"]:hover {
     background-color: #3a5a40;
+    transform: scale(1.03);
 }
 
-button[type="reset"] { /* Estilo para el botón de reset */
+/* Botón de reset */
+button[type="reset"] {
     background-color: #a3b18a;
     color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-left: 10px;
-    transition: background-color 0.3s ease;
 }
 
 button[type="reset"]:hover {
     background-color: #6b8e23;
+    transform: scale(1.03);
 }
 
-p {
-    margin-top: 20px;
-    color: #5e503f;
+/* Mensajes de error o éxito */
+.error-message {
+    color: #d9534f;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.success-message {
+    color: green;
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 1em;
+}
+
+/* Estilo para errores generales */
+.general-error {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #d9534f;
     text-align: center;
 }
 
+.general-error ul {
+    padding-left: 20px;
+}
+
+/* Enlace de redirección a inicio de sesión */
 a {
     color: #a3b18a;
     text-decoration: none;
@@ -99,25 +142,45 @@ a:hover {
     text-decoration: underline;
 }
 
-.error-message {
-    color: red;
-    font-size: 0.9em;
-    margin-top: 5px;
+/* Estilo para el mensaje general */
+p {
+    margin-top: 20px;
+    color: #5e503f;
+    text-align: center;
+    font-size: 1em;
 }
 
-.success-message {
-    color: green;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.general-error {
-    margin-top: 10px;
-    font-weight: bold;
-}
-
+/* Línea horizontal para separar secciones */
 hr {
     margin: 20px 0;
     border: 0;
     border-top: 1px solid #a3b18a;
+}
+
+/* Estilo para el contenedor de botones */
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Responsive para móviles */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+        width: 90%;
+    }
+
+    h1 {
+        font-size: 1.7em;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    button[type="submit"],
+    button[type="reset"] {
+        width: 100%;
+    }
 }

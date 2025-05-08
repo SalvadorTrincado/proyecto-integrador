@@ -1,7 +1,7 @@
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f1de;
-    color: #5e503f;
+    background-color: #f4f1de; /* Fondo suave claro */
+    color: #5e503f; /* Color de texto suave */
     margin: 0;
     padding: 20px;
     display: flex;
@@ -15,15 +15,22 @@ h1 {
     color: #a3b18a; /* Verde musgo */
     margin-bottom: 30px;
     text-align: center;
+    font-size: 2.5em; /* Tamaño de texto más grande */
+    font-weight: bold;
 }
 
 form {
-    background-color: #dad7cd;
+    background-color: #dad7cd; /* Color de fondo del formulario */
     padding: 30px;
     border-radius: 10px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
     width: 350px;
     max-width: 90%;
+    transition: transform 0.3s ease; /* Animación suave */
+}
+
+form:hover {
+    transform: translateY(-10px); /* Efecto de desplazamiento al pasar el ratón */
 }
 
 div {
@@ -33,8 +40,9 @@ div {
 label {
     display: block;
     margin-bottom: 5px;
-    color: #588157;
+    color: #588157; /* Verde oscuro */
     font-weight: bold;
+    font-size: 1.1em; /* Un poco más grande para visibilidad */
 }
 
 input[type="email"] {
@@ -44,43 +52,68 @@ input[type="email"] {
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+input[type="email"]:focus {
+    border-color: #588157; /* Cambiar el borde cuando el input está enfocado */
+    outline: none;
 }
 
 button[type="submit"] {
-    background-color: #588157;
+    background-color: #588157; /* Verde oscuro */
     color: white;
     padding: 12px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 18px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%; /* Que el botón ocupe todo el ancho del formulario */
 }
 
 button[type="submit"]:hover {
-    background-color: #3a5a40;
+    background-color: #3a5a40; /* Cambiar a un verde más oscuro al pasar el ratón */
+    transform: scale(1.05); /* Agrandar ligeramente el botón */
 }
 
 .error-message {
-    color: #d9534f;
+    color: #d9534f; /* Color de mensaje de error en rojo */
     margin-top: 10px;
     text-align: center;
+    font-size: 0.9em; /* Ajustar el tamaño de fuente */
 }
 
 p {
     margin-top: 20px;
-    color: #5e503f;
+    color: #5e503f; /* Color suave para el texto */
     text-align: center;
+    font-size: 1em; /* Un tamaño de texto legible */
 }
 
 a {
-    color: #a3b18a;
+    color: #a3b18a; /* Verde musgo para los enlaces */
     text-decoration: none;
     font-weight: bold;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #3a5a40;
+    color: #3a5a40; /* Color verde más oscuro al pasar el ratón */
     text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    form {
+        width: 90%; /* Hacer el formulario más estrecho en pantallas pequeñas */
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2em; /* Reducir el tamaño del título en pantallas pequeñas */
+    }
+
+    button[type="submit"] {
+        padding: 10px 15px;
+    }
 }

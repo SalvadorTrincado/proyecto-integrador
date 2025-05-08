@@ -11,39 +11,43 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+// Controlador que gestiona las vistas relacionadas con usuarios
 @Controller
 public class UsuarioController {
 
+    // Inyecta el servicio de usuario para acceder a la lógica de negocio
     @Autowired
     private UsuarioService usuarioService;
 
-    @GetMapping("/resgistrar_usuario")
-    public String registroUsuario(Model model) {
+    // Muestra el formulario de registro de usuario
+    @GetMapping("/registrar_usuario")
+    public String mostrarFormularioRegistro(Model model) {
         model.addAttribute("usuarioRegistroDTO", new RegistroUsuarioDTO());
         return "aplicacion_corporativa/registrar_usuario";
     }
 
-    @PostMapping("/resgistrar_usuario_post")
-    public String registroUsuario_procesado(
+    // Procesa el formulario de registro enviado por el usuario
+    @PostMapping("/registrar_usuario_post")
+    public String procesarRegistroUsuario(
             @Valid @ModelAttribute("usuarioRegistroDTO") RegistroUsuarioDTO registroUsuarioDTO,
             BindingResult result,
             Model model
     ) {
-
+        // Si hay errores de validación, vuelve al formulario con mensaje de error
         if (result.hasErrors()) {
             model.addAttribute("error", "Hay errores en el formulario. Por favor, revisa los campos.");
             return "aplicacion_corporativa/registrar_usuario";
         }
 
         try {
-            // Llamamos al método del servicio para registrar el usuario
-            usuarioService.registrarNuevoUsuarioDesdeRegistro(registroUsuarioDTO);
+            // Llama al servicio para registrar el usuario
+            usuarioService.registrarUsuarioDesdeDTO(registroUsuarioDTO);
             model.addAttribute("mensaje", "Usuario " + registroUsuarioDTO.getEmail() + " registrado correctamente");
-            return "redirect:/autenticacion/paso1"; // Redirigimos tras el registro exitoso
+            return "redirect:/autenticacion/paso1";
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage()); // Mostramos el error si ocurre alguno
-            return "aplicacion_corporativa/registrar_usuario"; // Volvemos al formulario con el error
+            // Si ocurre una excepción, muestra el mensaje de error
+            model.addAttribute("error", e.getMessage());
+            return "aplicacion_corporativa/registrar_usuario";
         }
     }
-
 }

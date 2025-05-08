@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Autenticación - Paso 2</title>
-    <link rel="stylesheet" href="/css/login_paso2.css"> </head>
+    <link rel="stylesheet" href="/css/login_paso2.css">
+</head>
 <body>
 <h1>Iniciar Sesión</h1>
 <h2>Introduce tu contraseña para el email: <span th:text="${emailPaso1}"></span></h2>
@@ -20,6 +21,5 @@
     <p><a href="/recuperar_password">¿Olvidaste tu contraseña?</a></p>
     <div class="error-message" th:if="${error != null}" th:text="${error}"></div>
 </form>
-
 </body>
 </html>
