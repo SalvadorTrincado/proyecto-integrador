@@ -53,7 +53,8 @@ label {
     font-size: 1.1em; /* Un poco más grande para visibilidad */
 }
 
-input[type="password"] {
+input[type="password"],
+input[type="text"] { /* Aplicamos el mismo ancho tanto para password como para text */
     width: calc(100% - 12px);
     padding: 10px;
     border: 1px solid #a3b18a;
@@ -63,9 +64,33 @@ input[type="password"] {
     transition: border 0.3s ease;
 }
 
-input[type="password"]:focus {
+input[type="password"]:focus,
+input[type="text"]:focus { /* Mantenemos el mismo estilo al enfocar */
     border-color: #588157; /* Cambiar el borde cuando el input está enfocado */
     outline: none;
+}
+
+/* Estilos para el contenedor del checkbox */
+form > div:nth-child(3) {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px; /* Espacio debajo del checkbox */
+}
+
+/* Estilos para el checkbox */
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+/* Estilos para la etiqueta del checkbox */
+form > div:nth-child(3) > label {
+    display: inline;
+    margin-bottom: 0;
+    font-weight: normal;
+    font-size: 1em;
 }
 
 button[type="submit"] {

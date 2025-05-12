@@ -68,6 +68,31 @@ input:focus {
     border-color: #588157;
 }
 
+/* Estilos para el contenedor del checkbox "Mostrar contraseña" */
+.show-password-group,
+.show-confirm-password-group {
+    display: flex;
+    align-items: center;
+    margin-top: 10px; /* Espacio superior para separarlo del input */
+    margin-bottom: 15px; /* Espacio inferior */
+}
+
+.show-password-group input[type="checkbox"],
+.show-confirm-password-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.show-password-group label,
+.show-confirm-password-group label {
+    display: inline;
+    margin-bottom: 0;
+    font-weight: normal;
+    font-size: 1em;
+}
+
 /* Estilo de los botones */
 button[type="submit"],
 button[type="reset"] {

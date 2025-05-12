@@ -3,58 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <title>Registro y Creación de Usuario</title>
-    <link rel="stylesheet" href="/css/crear_usuario.css"> <!-- Tu CSS personalizado -->
-</head>
+    <link rel="stylesheet" href="/css/crear_usuario.css"> </head>
 <body>
 <div class="container">
     <h1>Registro y Creación de Usuario</h1>
 
-    <!-- Mensaje de error general -->
     <div th:if="${error}" class="error-message">
         <p th:text="${error}"></p>
     </div>
 
-    <!-- Mensaje de éxito -->
     <div th:if="${mensaje}" class="success-message">
         <p th:text="${mensaje}"></p>
     </div>
 
     <form th:action="@{/registrar_usuario_post}" method="post" th:object="${usuarioRegistroDTO}">
-        <!-- Email -->
         <div class="form-group">
             <label for="email">Correo electrónico:</label>
             <input type="email" id="email" th:field="*{email}">
             <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
         </div>
 
-        <!-- Contraseña -->
         <div class="form-group">
             <label for="password">Contraseña:</label>
             <input type="password" id="password" th:field="*{password}">
             <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
         </div>
 
-        <!-- Confirmar Contraseña -->
+        <div class="form-group show-password-group">
+            <input type="checkbox" id="showPassword">
+            <label for="showPassword">Mostrar contraseña</label>
+        </div>
+
         <div class="form-group">
             <label for="confirmPassword">Confirmar contraseña:</label>
             <input type="password" id="confirmPassword" th:field="*{confirmPassword}">
             <div class="error-message" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
         </div>
 
-        <!-- Botones -->
+        <div class="form-group show-confirm-password-group">
+            <input type="checkbox" id="showConfirmPassword">
+            <label for="showConfirmPassword">Mostrar confirmar contraseña</label>
+        </div>
+
         <button type="submit">Registrar Usuario</button>
         <button type="reset">Limpiar Formulario</button>
 
-        <!-- Errores generales de validación del DTO -->
         <div class="error-message general-error" th:if="${#fields.hasGlobalErrors()}">
             <ul>
                 <li th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></li>
             </ul>
         </div>
 
-        <!-- Enlace a inicio de sesión -->
         <p>¿Ya tienes una cuenta? <a th:href="@{/autenticacion/paso1}">Iniciar Sesión</a></p>
     </form>
 </div>
+
+<script>
+    // Obtiene la referencia al input de la contraseña
+    const passwordInput = document.getElementById('password');
+    // Obtiene la referencia al checkbox de mostrar contraseña
+    const showPasswordCheckbox = document.getElementById('showPassword');
+
+    // Agrega un listener para el evento 'change' del checkbox de la contraseña
+    showPasswordCheckbox.addEventListener('change', function() {
+        // Cambia el tipo del input de contraseña
+        passwordInput.type = this.checked ? 'text' : 'password';
+    });
+
+    // Obtiene la referencia al input de confirmar contraseña
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    // Obtiene la referencia al checkbox de mostrar confirmar contraseña
+    const showConfirmPasswordCheckbox = document.getElementById('showConfirmPassword');
+
+    // Agrega un listener para el evento 'change' del checkbox de confirmar contraseña
+    showConfirmPasswordCheckbox.addEventListener('change', function() {
+        // Cambia el tipo del input de confirmar contraseña
+        confirmPasswordInput.type = this.checked ? 'text' : 'password';
+    });
+</script>
 </body>
 </html>

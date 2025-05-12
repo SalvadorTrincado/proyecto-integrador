@@ -14,13 +14,30 @@
     <input type="hidden" name="email" th:value="${emailPaso1}">
     <div>
         <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" th:field="*{password}" >
+        <input type="password" id="password" name="password" th:field="*{password}">
         <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+    </div>
+    <div>
+        <input type="checkbox" id="showPassword">
+        <label for="showPassword">Mostrar contraseña</label>
     </div>
     <button type="submit">Iniciar Sesión</button>
     <p><a href="/autenticacion/paso1">Volver para cambiar el email</a></p>
     <p><a href="/recuperar_password">¿Olvidaste tu contraseña?</a></p>
     <div class="error-message" th:if="${error != null}" th:text="${error}"></div>
 </form>
+
+<script>
+    // Obtiene la referencia al input de la contraseña
+    const passwordInput = document.getElementById('password');
+    // Obtiene la referencia al checkbox de mostrar contraseña
+    const showPasswordCheckbox = document.getElementById('showPassword');
+
+    // Agrega un listener para el evento 'change' del checkbox
+    showPasswordCheckbox.addEventListener('change', function() {
+        // Cambia el tipo del input de contraseña a 'text' si el checkbox está marcado, o a 'password' si no lo está
+        passwordInput.type = this.checked ? 'text' : 'password';
+    });
+</script>
 </body>
 </html>
