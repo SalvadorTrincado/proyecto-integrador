@@ -19,9 +19,9 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, AutenticacionService autenticacionService) throws Exception { // Usa AutenticacionService
+    public AuthenticationManager authenticationManager(HttpSecurity http, AutenticacionService autenticacionService) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        // Aquí configuramos el UserDetailsService.  IMPORTANTE: Usamos AutenticacionService
+        // Configuramos el UserDetailsService para que Spring SecurityDelegate la autenticación al servicio.
         builder.userDetailsService(autenticacionService).passwordEncoder(passwordEncoder());
         return builder.build();
     }

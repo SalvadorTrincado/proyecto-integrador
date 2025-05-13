@@ -15,8 +15,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -141,7 +139,7 @@ public class RegistroEmpleadoController {
         session.removeAttribute("paso4");
 
         // Redirigir a la página de éxito
-        return "redirect:/resumen/exito";
+        return "redirect:/resumen";
     }
 
     private Empleado crearEmpleadoDesdeSesion(RegistroEmpleadoPaso1DTO paso1DTO,
@@ -188,7 +186,7 @@ public class RegistroEmpleadoController {
         return empleado;
     }
 
-    @GetMapping("/resumen/exito")
+    @GetMapping("/resumen")
     public String mostrarPaginaExito() {
         return "aplicacion_corporativa/registro_empleado_paso5";
     }

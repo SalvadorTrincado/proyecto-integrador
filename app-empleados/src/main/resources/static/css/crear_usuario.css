@@ -1,8 +1,8 @@
 /* Estilo general del cuerpo */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f1de;
-    color: #5e503f;
+    background-color: #f4f1de; /* Fondo suave claro */
+    color: #5e503f; /* Color de texto suave */
     margin: 0;
     padding: 20px;
     display: flex;
@@ -12,30 +12,28 @@ body {
     box-sizing: border-box;
 }
 
-/* Contenedor principal del formulario */
+h1 {
+    color: #a3b18a; /* Verde musgo */
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2.5em; /* Tamaño de texto más grande */
+    font-weight: bold;
+}
+
 .container {
-    background-color: #dad7cd;
+    background-color: #dad7cd; /* Color de fondo del formulario */
     padding: 30px;
     border-radius: 10px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
+    width: 350px;
     max-width: 90%;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease; /* Animación suave */
 }
 
 .container:hover {
-    transform: translateY(-5px);
+    transform: translateY(-10px); /* Efecto de desplazamiento al pasar el ratón */
 }
 
-/* Títulos del formulario */
-h1 {
-    color: #a3b18a;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 2em;
-}
-
-/* Estilo de los campos del formulario */
 .form-group {
     margin-bottom: 20px;
 }
@@ -43,29 +41,26 @@ h1 {
 label {
     display: block;
     margin-bottom: 5px;
-    color: #588157;
+    color: #588157; /* Verde oscuro */
     font-weight: bold;
-    font-size: 1.05em;
+    font-size: 1.1em; /* Un poco más grande para visibilidad */
 }
 
-/* Campos de entrada (email, contraseña, etc.) */
 input[type="email"],
 input[type="password"],
-input[type="text"],
-input[type="file"] {
-    width: 100%;
+input[type="text"] {
+    width: calc(100% - 12px);
     padding: 10px;
     border: 1px solid #a3b18a;
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 16px;
-    margin-top: 5px;
     transition: border 0.3s ease;
 }
 
 input:focus {
+    border-color: #588157; /* Cambiar el borde cuando el input está enfocado */
     outline: none;
-    border-color: #588157;
 }
 
 /* Estilos para el contenedor del checkbox "Mostrar contraseña" */
@@ -73,8 +68,8 @@ input:focus {
 .show-confirm-password-group {
     display: flex;
     align-items: center;
-    margin-top: 10px; /* Espacio superior para separarlo del input */
-    margin-bottom: 15px; /* Espacio inferior */
+    margin-top: 10px;
+    margin-bottom: 20px; /* Ajustado para consistencia con otros form-group */
 }
 
 .show-password-group input[type="checkbox"],
@@ -93,45 +88,33 @@ input:focus {
     font-size: 1em;
 }
 
-/* Estilo de los botones */
-button[type="submit"],
-button[type="reset"] {
+button[type="submit"] {
+    background-color: #588157; /* Verde oscuro */
+    color: white;
     padding: 12px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    flex: 1;
-}
-
-/* Botón de submit */
-button[type="submit"] {
-    background-color: #588157;
-    color: white;
+    width: 100%; /* Que el botón ocupe todo el ancho del formulario */
 }
 
 button[type="submit"]:hover {
-    background-color: #3a5a40;
-    transform: scale(1.03);
+    background-color: #3a5a40; /* Cambiar a un verde más oscuro al pasar el ratón */
+    transform: scale(1.05); /* Agrandar ligeramente el botón */
 }
 
-/* Botón de reset */
+/* Ocultamos el botón de reset */
 button[type="reset"] {
-    background-color: #a3b18a;
-    color: white;
+    display: none;
 }
 
-button[type="reset"]:hover {
-    background-color: #6b8e23;
-    transform: scale(1.03);
-}
-
-/* Mensajes de error o éxito */
 .error-message {
-    color: #d9534f;
-    font-size: 0.9em;
-    margin-top: 5px;
+    color: #d9534f; /* Color de mensaje de error en rojo */
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.9em; /* Ajustar el tamaño de fuente */
 }
 
 .success-message {
@@ -142,70 +125,60 @@ button[type="reset"]:hover {
     font-size: 1em;
 }
 
-/* Estilo para errores generales */
-.general-error {
-    margin-top: 10px;
-    font-weight: bold;
-    color: #d9534f;
+.error-message.outside-container {
+    text-align: center; /* Centramos los mensajes fuera del contenedor también */
+}
+
+p {
+    margin-top: 20px;
+    color: #5e503f; /* Color suave para el texto */
     text-align: center;
+    font-size: 1em; /* Un tamaño de texto legible */
 }
 
-.general-error ul {
-    padding-left: 20px;
-}
-
-/* Enlace de redirección a inicio de sesión */
 a {
-    color: #a3b18a;
+    color: #a3b18a; /* Verde musgo para los enlaces */
     text-decoration: none;
     font-weight: bold;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #3a5a40;
+    color: #3a5a40; /* Color verde más oscuro al pasar el ratón */
     text-decoration: underline;
 }
 
-/* Estilo para el mensaje general */
-p {
-    margin-top: 20px;
-    color: #5e503f;
-    text-align: center;
-    font-size: 1em;
+/* Eliminamos estilos innecesarios */
+.general-error {
+    display: none; /* Ya estamos usando .error-message */
 }
 
-/* Línea horizontal para separar secciones */
+.general-error ul {
+    display: none; /* Ya no necesitamos la lista */
+}
+
 hr {
-    margin: 20px 0;
-    border: 0;
-    border-top: 1px solid #a3b18a;
+    display: none;
 }
 
-/* Estilo para el contenedor de botones */
 .button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    display: none;
 }
 
 /* Responsive para móviles */
 @media (max-width: 600px) {
     .container {
+        width: 90%; /* Hacer el formulario más estrecho en pantallas pequeñas */
         padding: 20px;
-        width: 90%;
     }
 
     h1 {
-        font-size: 1.7em;
+        font-size: 2em; /* Reducir el tamaño del título en pantallas pequeñas */
+        margin-bottom: 20px; /* Reducir el margen inferior del título */
     }
 
-    .button-group {
-        flex-direction: column;
-    }
-
-    button[type="submit"],
-    button[type="reset"] {
-        width: 100%;
+    button[type="submit"] {
+        padding: 10px 15px;
+        font-size: 16px; /* Reducir el tamaño de la fuente del botón */
     }
 }

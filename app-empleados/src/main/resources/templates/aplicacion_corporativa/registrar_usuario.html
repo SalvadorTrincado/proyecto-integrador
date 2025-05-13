@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Registro y Creación de Usuario</title>
-    <link rel="stylesheet" href="/css/crear_usuario.css"> </head>
+    <link rel="stylesheet" href="/css/crear_usuario.css">
+</head>
 <body>
-<div class="container">
-    <h1>Registro y Creación de Usuario</h1>
+<h1>Registro y Creación de Usuario</h1>
 
-    <div th:if="${error}" class="error-message">
+<div class="container">
+
+    <div th:if="${error}" class="error-message outside-container">
         <p th:text="${error}"></p>
     </div>
 
-    <div th:if="${mensaje}" class="success-message">
+    <div th:if="${mensaje}" class="success-message outside-container">
         <p th:text="${mensaje}"></p>
     </div>
 
     <form th:action="@{/registrar_usuario_post}" method="post" th:object="${usuarioRegistroDTO}">
+        <div class="error-message outside-container" th:if="${#fields.hasGlobalErrors()}">
+            <p th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></p>
+        </div>
+
         <div class="form-group">
             <label for="email">Correo electrónico:</label>
             <input type="email" id="email" th:field="*{email}">
@@ -47,12 +53,6 @@
 
         <button type="submit">Registrar Usuario</button>
         <button type="reset">Limpiar Formulario</button>
-
-        <div class="error-message general-error" th:if="${#fields.hasGlobalErrors()}">
-            <ul>
-                <li th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></li>
-            </ul>
-        </div>
 
         <p>¿Ya tienes una cuenta? <a th:href="@{/autenticacion/paso1}">Iniciar Sesión</a></p>
     </form>
