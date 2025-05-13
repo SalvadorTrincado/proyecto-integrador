@@ -1,0 +1,203 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f1de; /* Fondo suave claro */
+    color: #5e503f; /* Color de texto suave */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+main {
+    width: 90%;
+    max-width: 800px;
+    padding: 30px;
+    background-color: #faf0e6; /* Un tono ligeramente más claro para el main */
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #a3b18a; /* Verde musgo */
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 2em; /* Tamaño de texto más grande */
+    font-weight: bold;
+}
+
+.barra-pasos {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #dad7cd;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.barra-pasos a {
+    color: #588157; /* Verde oscuro */
+    text-decoration: none;
+    padding: 10px 15px;
+    margin: 0 5px;
+    border-radius: 5px;
+    font-weight: bold;
+    background-color: #f4f1de;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.barra-pasos a:hover {
+    background-color: #a3b18a; /* Verde musgo al pasar el ratón */
+    color: white;
+}
+
+form {
+    background-color: #dad7cd; /* Color de fondo del formulario */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    transition: transform 0.3s ease; /* Animación suave */
+}
+
+form:hover {
+    transform: translateY(-5px); /* Un desplazamiento ligeramente menor */
+}
+
+div {
+    margin-bottom: 15px; /* Reducir un poco el margen */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #588157; /* Verde oscuro */
+    font-weight: bold;
+    font-size: 1em; /* Ajustar tamaño */
+}
+
+input[type="text"],
+input[type="number"],
+input[type="file"],
+select,
+textarea {
+    width: calc(100% - 12px);
+    padding: 10px;
+    border: 1px solid #a3b18a;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border 0.3s ease;
+    margin-bottom: 10px; /* Añadir margen inferior a los inputs */
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="file"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #588157; /* Cambiar el borde cuando el input está enfocado */
+    outline: none;
+}
+
+input[type="radio"] {
+    margin-right: 5px;
+}
+
+textarea {
+    resize: vertical; /* Permitir redimensionar verticalmente */
+}
+
+input[type="reset"],
+button[type="submit"] {
+    background-color: #588157; /* Verde oscuro */
+    color: white;
+    padding: 10px 15px; /* Reducir un poco el padding */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px; /* Ajustar tamaño */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+input[type="reset"] {
+    background-color: #a3b18a; /* Verde musgo para el reset */
+    margin-right: 10px;
+}
+
+input[type="reset"]:hover,
+button[type="submit"]:hover {
+    background-color: #3a5a40; /* Cambiar a un verde más oscuro al pasar el ratón */
+    transform: scale(1.02); /* Un escalado menor */
+}
+
+.error {
+    color: #d9534f; /* Color de mensaje de error en rojo */
+    margin-top: 5px;
+    font-size: 0.9em; /* Ajustar el tamaño de fuente */
+}
+
+/* Estilos para los botones de "Decorado" y "Sobrio" */
+main > div {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+main > div button {
+    padding: 8px 12px;
+    border: 1px solid #a3b18a;
+    border-radius: 5px;
+    background-color: white;
+    color: #588157;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+main > div button:hover {
+    background-color: #a3b18a;
+    color: white;
+}
+
+@media (max-width: 600px) {
+    main {
+        width: 95%;
+        padding: 20px;
+    }
+
+    h2 {
+        font-size: 1.8em; /* Reducir el tamaño del título en pantallas pequeñas */
+    }
+
+    .barra-pasos {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .barra-pasos a {
+        margin: 5px 0;
+        width: 80%;
+        text-align: center;
+    }
+
+    form {
+        padding: 20px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    select,
+    textarea,
+    input[type="reset"],
+    button[type="submit"] {
+        font-size: 14px;
+        padding: 8px;
+    }
+}

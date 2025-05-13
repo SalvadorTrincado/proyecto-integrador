@@ -1,6 +1,6 @@
 package com.equipo.Configuration;
 
-import com.equipo.service.UserDetailService;
+import com.equipo.service.AutenticacionService; // Importa AutenticacionService
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,10 +19,10 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, UserDetailService userDetailService) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http, AutenticacionService autenticacionService) throws Exception { // Usa AutenticacionService
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        // Aquí podrías configurar usuarios en memoria si no quieres usar un servicio de usuario personalizado
-        builder.userDetailsService(userDetailService).passwordEncoder(passwordEncoder());
+        // Aquí configuramos el UserDetailsService.  IMPORTANTE: Usamos AutenticacionService
+        builder.userDetailsService(autenticacionService).passwordEncoder(passwordEncoder());
         return builder.build();
     }
 
@@ -33,13 +33,13 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 "/controller/**",
                                 "/registro/**",
-                                "/static/css/**", // Permitimos acceso sin autenticación a todos los archivos CSS
+                                "/static/css/**",
                                 "/js/**",
                                 "/h2/**",
                                 "/autenticacion/**"
                         ).permitAll()
-                        .requestMatchers("/aplicacion_corporativa/**").authenticated() // Todas las rutas bajo /aplicacion_corporativa/ requieren autenticación
-                        .anyRequest().permitAll() // Permite el acceso a cualquier otra ruta (ajústalo según tus necesidades)
+                        .requestMatchers("/aplicacion_corporativa/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .formLogin((form) -> form
                         .loginPage("/autenticacion/paso1")

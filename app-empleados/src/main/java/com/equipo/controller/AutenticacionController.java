@@ -2,10 +2,16 @@ package com.equipo.controller;
 
 import com.equipo.dto.LoginPaso1DTO;
 import com.equipo.dto.LoginPaso2DTO;
+import com.equipo.entity.Usuario;
 import com.equipo.service.AutenticacionService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,8 +22,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class AutenticacionController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AutenticacionController.class);
+
+    private final AutenticacionService autenticacionService;
+
     @Autowired
-    private AutenticacionService autenticacionService;
+    public AutenticacionController(AutenticacionService autenticacionService) {
+        this.autenticacionService = autenticacionService;
+    }
 
     @GetMapping("/autenticacion/paso1")
     public String mostrarFormularioPaso1(Model model) {
@@ -33,11 +45,10 @@ public class AutenticacionController {
             HttpSession session
     ) {
         if (result.hasErrors()) {
+            logger.info("Errores de validación en el paso 1: {}", result.getAllErrors());
             return "aplicacion_corporativa/login_paso1";
         }
-
-        String emailIntroducido = loginPaso1DTO.getEmail();
-        session.setAttribute("emailPaso1", emailIntroducido);
+        session.setAttribute("emailPaso1", loginPaso1DTO.getEmail());
         return "redirect:/autenticacion/paso2";
     }
 
@@ -60,32 +71,53 @@ public class AutenticacionController {
             HttpSession session
     ) {
         String email = (String) session.getAttribute("emailPaso1");
-
         if (email == null) {
+            logger.warn("Email de paso 1 no encontrado en la sesión, redirigiendo.");
             return "redirect:/autenticacion/paso1-post";
         }
 
         if (result.hasErrors()) {
+            logger.info("Errores de validación en el paso 2 para el email {}: {}", email, result.getAllErrors());
             model.addAttribute("emailPaso1", email);
             return "aplicacion_corporativa/login_paso2";
         }
 
-        String passwordIntroducida = loginPaso2DTO.getPassword();
+        try {
+            logger.info("Intentando autenticar al usuario con email: {}", email);
+            // Spring Security maneja la autenticación.
+            // No necesitamos llamar a autenticacionService.autenticarUsuario() ni loadUserByUsername().
 
-        // Usamos el servicio de autenticación para validar las credenciales
-        boolean autenticado = autenticacionService.autenticarUsuario(loginPaso2DTO, email);
-
-        if (autenticado) {
-            return "redirect:/aplicacion_corporativa/area_personal";
-        } else {
+        } catch (BadCredentialsException e) {
+            logger.warn("Error de autenticación para el email {}: Contraseña incorrecta", email);
+            Usuario usuario = autenticacionService.getUsuarioPorEmail(email);
+            int intentosRestantes = autenticacionService.getMaxIntentosFallidos() - usuario.getIntentosFallidos();
             model.addAttribute("emailPaso1", email);
-            model.addAttribute("error", "La contraseña introducida no es correcta");
-            return "aplicacion_corporativa/login_paso2";
+            model.addAttribute("error", "Contraseña incorrecta. Te quedan " + intentosRestantes + " intentos.");
+            logger.info("Modelo después de BadCredentialsException: {}", model);
+            return "aplicacion_corporativa/login_paso2"; // Retorno directo de la vista
+        } catch (LockedException e) {
+            logger.warn("Cuenta bloqueada para el email: {}", email);
+            model.addAttribute("emailPaso1", email);
+            model.addAttribute("error", "Cuenta bloqueada. Inténtalo de nuevo más tarde.");
+            logger.info("Modelo después de LockedException: {}", model);
+            return "aplicacion_corporativa/login_paso2"; // Retorno directo de la vista
+        } catch (UsernameNotFoundException e) {
+            logger.warn("Usuario no encontrado para el email: {}", email);
+            model.addAttribute("emailPaso1", email);
+            model.addAttribute("error", "Usuario no encontrado");
+            logger.info("Modelo después de UsernameNotFoundException: {}", model);
+            return "aplicacion_corporativa/login_paso2"; // Retorno directo de la vista
         }
+
+        logger.info("Autenticación exitosa para el email: {}, redirigiendo al área personal.", email);
+        // Si la autenticación es exitosa, Spring Security redirige.
+        return "redirect:/aplicacion_corporativa/area_personal";
     }
 
     @PostMapping("/logout")
     public String cerrarSesion(HttpSession session) {
+        String email = (String) session.getAttribute("emailPaso1");
+        logger.info("Cerrando sesión para el email: {}", email);
         session.invalidate();
         return "redirect:/autenticacion/paso1";
     }

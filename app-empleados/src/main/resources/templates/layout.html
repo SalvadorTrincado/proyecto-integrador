@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es"
+      th:fragment="layout (contenido)">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titulo}">Título</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<header>
+    <h1>Proyecto Integrador</h1>
+</header>
+
+<main>
+    <div th:insert="${contenido}"></div>
+</main>
+
+<footer>
+    <p>© 2025 Salvador Trincado</p>
+</footer>
+
+</body>
+</html>
