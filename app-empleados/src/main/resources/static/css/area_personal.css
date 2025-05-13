@@ -19,11 +19,14 @@ h1 {
 
 form {
     background-color: #dad7cd;
-    padding: 30px;
+    padding: 15px; /* Ajustar el padding para que coincida con el contenedor */
     border-radius: 10px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    max-width: 90%;
+    /* width: 400px;
+    max-width: 90%; */ /* Comentar estas líneas para que el form se ajuste al contenido */
+    display: flex; /* Convertir el form en un contenedor flex */
+    gap: 10px; /* Espacio entre los botones dentro del form */
+    align-items: center; /* Alinear verticalmente los botones dentro del form */
 }
 
 div {
@@ -95,4 +98,41 @@ a:hover {
 .general-error {
     margin-top: 10px;
     font-weight: bold;
+}
+
+/* Estilos para el contenedor de los botones */
+.botones-container {
+    display: flex;
+    gap: 10px; /* Espacio entre los elementos hijos */
+    margin-top: 20px; /* Espacio desde el contenido superior */
+    background-color: #dad7cd; /* Fondo gris claro para el contenedor */
+    padding: 15px; /* Espacio alrededor del contenedor */
+    border-radius: 10px; /* Bordes redondeados */
+    align-items: center; /* Alineación vertical al centro */
+}
+
+/* Estilos para ambos botones (y ahora también el enlace con la misma clase) */
+.boton-registro, .boton-desconectar {
+    background-color: #588157; /* Verde */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+    text-decoration: none; /* Para que el enlace no tenga subrayado por defecto */
+}
+
+.boton-registro:hover, .boton-desconectar:hover {
+    background-color: #3a5a40; /* Verde oscuro al pasar el ratón */
+    color: white; /* Mantenemos el color del texto blanco al hacer hover */
+    text-decoration: none; /* Evita el subrayado al hacer hover en el enlace */
+}
+
+/* Estilo para el contenedor del enlace de registro */
+.boton-registro-container {
+    background-color: #dad7cd; /* Fondo gris claro */
+    border-radius: 5px; /* Bordes redondeados */
+    padding: 2px; /* Pequeño padding para el espacio alrededor del enlace */
 }

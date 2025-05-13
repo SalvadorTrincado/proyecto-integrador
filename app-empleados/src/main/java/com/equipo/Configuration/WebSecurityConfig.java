@@ -36,7 +36,11 @@ public class WebSecurityConfig {
                                 "/static/css/**",
                                 "/js/**",
                                 "/h2/**",
-                                "/autenticacion/**"
+                                "/autenticacion/**",
+                                "/registro_empleado_paso1",  // Agregado para permitir acceso sin autenticación
+                                "/registro_empleado_paso2",  // Agregado para permitir acceso sin autenticación
+                                "/registro_empleado_paso3",  // Agregado para permitir acceso sin autenticación
+                                "/registro_empleado_paso4"   // Agregado para permitir acceso sin autenticación
                         ).permitAll()
                         .requestMatchers("/aplicacion_corporativa/**").authenticated()
                         .anyRequest().permitAll()

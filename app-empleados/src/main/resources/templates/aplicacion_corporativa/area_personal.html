@@ -4,15 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área Personal</title>
-    <link rel="stylesheet" href="/css/area_personal.css"> </head>
+    <link rel="stylesheet" href="/css/area_personal.css">
+</head>
 <body>
-    <h1>Bienvenido a tu Área Personal</h1>
+<h1>Bienvenido a tu Área Personal</h1>
 
-    <p th:if="${usuarioId != null}">Tu ID de usuario es: <span th:text="${usuarioId}"></span></p>
-    <p th:unless="${usuarioId != null}">Usuario no identificado.</p>
+<p th:if="${#authentication.principal != 'anonymousUser'}">
+    Correo electrónico: <span th:text="${#authentication.principal.username}"></span>
+</p>
+<p th:unless="${#authentication.principal != 'anonymousUser'}">
+    Usuario no identificado.
+</p>
 
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Desconectar</button>
+<div class="botones-container">
+    <form th:action="@{/logout}" method="post" style="display:inline;">
+        <button type="submit" class="boton-desconectar">Desconectar</button>
     </form>
+    <a href="/registro_empleado_paso1" class="boton-registro">Registrarte como empleado</a>
+</div>
 </body>
 </html>
