@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es"
-      th:replace="~{layout :: layout(contenido = ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
+  <meta charset="UTF-8">
+  <title>Registro de Empleado - Paso 4</title>
   <link rel="stylesheet" th:href="@{/css/registro_empleado_paso4.css}">
 </head>
+<body th:replace="~{layout :: layout(contenido = ~{::main})}">
 <th:block th:fragment="main">
   <main>
     <nav class="barra-pasos">
@@ -79,4 +81,5 @@
     </form>
   </main>
 </th:block>
+</body>
 </html>

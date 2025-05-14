@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es"
-      th:replace="~{layout :: layout(contenido = ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
+  <meta charset="UTF-8">
+  <title>Registro de Empleado - Paso 2</title>
   <link rel="stylesheet" th:href="@{/css/registro_empleado_paso2.css}">
 </head>
+<body th:replace="~{layout :: layout(contenido = ~{::main})}">
 <th:block th:fragment="main">
   <main>
     <nav class="barra-pasos">
@@ -20,9 +22,12 @@
 
       <div>
         <label>Tipo de documento</label>
-        <input type="radio" th:field="*{tipoDocumento}" value="DNI" id="tipoDocumento_DNI"> <label for="tipoDocumento_DNI">DNI</label>
-        <input type="radio" th:field="*{tipoDocumento}" value="NIE" id="tipoDocumento_NIE"> <label for="tipoDocumento_NIE">NIE</label>
-        <input type="radio" th:field="*{tipoDocumento}" value="Pasaporte" id="tipoDocumento_Pasaporte"> <label for="tipoDocumento_Pasaporte">Pasaporte</label>
+        <input type="radio" th:field="*{tipoDocumento}" value="DNI" id="tipoDocumento_DNI">
+        <label for="tipoDocumento_DNI">DNI</label>
+        <input type="radio" th:field="*{tipoDocumento}" value="NIE" id="tipoDocumento_NIE">
+        <label for="tipoDocumento_NIE">NIE</label>
+        <input type="radio" th:field="*{tipoDocumento}" value="Pasaporte" id="tipoDocumento_Pasaporte">
+        <label for="tipoDocumento_Pasaporte">Pasaporte</label>
         <p th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}" class="error"></p>
       </div>
 
@@ -117,4 +122,5 @@
     </form>
   </main>
 </th:block>
+</body>
 </html>
