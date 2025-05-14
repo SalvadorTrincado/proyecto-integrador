@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Registro de Empleado - Paso 1</title>
-    <link rel="stylesheet" th:href="@{/css/area_personal.css}">
+    <link rel="stylesheet" th:href="@{/css/registro_empleado_paso1.css}">
 </head>
 <body th:replace="~{layout :: layout(contenido = ~{::main})}">
 <th:block th:fragment="main">
@@ -13,7 +13,7 @@
             <a th:href="@{/registro_empleado_paso2}" class="paso">Paso 2</a>
             <a th:href="@{/registro_empleado_paso3}" class="paso">Paso 3</a>
             <a th:href="@{/registro_empleado_paso4}" class="paso">Paso 4</a>
-            <a class="paso">Paso 5</a>
+            <a th:href="@{/resumen/exito}" class="paso">Paso 4</a>
         </nav>
 
         <h2>Registro de Empleado – Paso 1: Datos personales</h2>

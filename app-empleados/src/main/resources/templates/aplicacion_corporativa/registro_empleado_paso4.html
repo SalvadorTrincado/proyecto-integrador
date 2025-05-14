@@ -13,7 +13,7 @@
       <a th:href="@{/registro_empleado_paso2}" class="paso">Paso 2</a>
       <a th:href="@{/registro_empleado_paso3}" class="paso">Paso 3</a>
       <a th:href="@{/registro_empleado_paso4}" class="paso paso-activo">Paso 4</a>
-      <a class="paso">Paso 5</a>
+      <a th:href="@{/resumen/exito}" class="paso">Paso 4</a>
     </nav>
 
     <h2>Registro de Empleado – Paso 4: Datos económicos</h2>
@@ -76,7 +76,7 @@
       <div style="margin-top: 1rem;">
         <button type="button" onclick="window.location.href='/registro_empleado_paso3'">Anterior</button>
         <input type="reset" value="Resetear">
-        <button type="submit">Finalizar registro</button>
+        <button type="submit">Siguiente</button>
       </div>
     </form>
   </main>

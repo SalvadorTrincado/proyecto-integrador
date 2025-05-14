@@ -1,7 +1,8 @@
+/* Estilo general del cuerpo */
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f1de; /* Fondo suave claro */
-    color: #5e503f; /* Color de texto suave */
+    background-color: #f4f1de;
+    color: #5e503f;
     margin: 0;
     padding: 20px;
     display: flex;
@@ -12,29 +13,24 @@ body {
 }
 
 main {
-    width: 90%;
-    max-width: 800px;
+    background-color: #dad7cd;
     padding: 30px;
-    background-color: #faf0e6; /* Un tono ligeramente más claro para el main */
     border-radius: 10px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-    margin-bottom: 20px;
+    width: 600px;
+    max-width: 95%;
+    transition: transform 0.3s ease;
+}
+
+main:hover {
+    transform: translateY(-5px);
 }
 
 h2 {
-    color: #a3b18a; /* Verde musgo */
+    color: #a3b18a;
     margin-bottom: 20px;
     text-align: center;
-    font-size: 2.5em; /* Tamaño de texto más grande */
-    font-weight: bold;
-}
-
-h3 {
-    color: #588157; /* Verde oscuro */
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-size: 1.6em;
+    font-size: 2em;
     font-weight: bold;
 }
 
@@ -43,70 +39,128 @@ h3 {
     justify-content: center;
     margin-bottom: 20px;
     padding: 10px;
-    background-color: #dad7cd;
     border-radius: 5px;
+    background-color: #e8e4c9;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.barra-pasos a {
-    color: #588157; /* Verde oscuro */
-    text-decoration: none;
+.paso {
+    color: #588157;
     padding: 10px 15px;
     margin: 0 5px;
     border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9em;
     font-weight: bold;
-    background-color: #f4f1de;
+    background-color: #f1f0e8;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.barra-pasos a:hover {
-    background-color: #a3b18a; /* Verde musgo al pasar el ratón */
-    color: white;
-}
-
-.botones-estilo {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.botones-estilo button {
-    padding: 8px 12px;
-    border: 1px solid #a3b18a;
-    border-radius: 5px;
-    background-color: white;
-    color: #588157;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.botones-estilo button:hover {
+.paso:hover {
     background-color: #a3b18a;
     color: white;
 }
 
-p {
-    margin-bottom: 8px;
-    line-height: 1.6;
+.paso-activo {
+    background-color: #588157;
+    color: white;
 }
 
-p strong {
-    font-weight: bold;
-    color: #3a5a40; /* Un tono de verde más oscuro para resaltar */
+div {
+    margin-bottom: 15px;
 }
 
-ul {
-    margin-top: 5px;
-    margin-bottom: 10px;
-    padding-left: 20px;
-}
-
-ul li {
+label {
+    display: block;
     margin-bottom: 5px;
-    list-style-type: disc;
+    color: #588157;
+    font-weight: bold;
+    font-size: 1em;
 }
 
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select {
+    width: calc(100% - 12px);
+    padding: 10px;
+    border: 1px solid #a3b18a;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
+
+input:focus,
+select:focus {
+    border-color: #588157;
+    outline: none;
+}
+
+.error {
+    color: #d9534f;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+div[style="margin-top: 1rem;"] {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+button {
+    background-color: #588157;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #3a5a40;
+    transform: scale(1.02);
+}
+
+input[type="reset"] {
+    background-color: #a3b18a;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+input[type="reset"]:hover {
+    background-color: #6b9080;
+    transform: scale(1.02);
+}
+
+p {
+    margin-top: 15px;
+    color: #5e503f;
+    text-align: center;
+    font-size: 1em;
+}
+
+a {
+    color: #a3b18a;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #3a5a40;
+    text-decoration: underline;
+}
+
+/* Responsive para móviles */
 @media (max-width: 600px) {
     main {
         width: 95%;
@@ -114,11 +168,8 @@ ul li {
     }
 
     h2 {
-        font-size: 2em;
-    }
-
-    h3 {
-        font-size: 1.4em;
+        font-size: 1.8em;
+        margin-bottom: 15px;
     }
 
     .barra-pasos {
@@ -126,22 +177,53 @@ ul li {
         align-items: center;
     }
 
-    .barra-pasos a {
+    .paso {
         margin: 5px 0;
         width: 80%;
         text-align: center;
     }
 
-    p {
-        font-size: 0.95em;
-        line-height: 1.5;
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    button,
+    input[type="reset"] {
+        font-size: 14px;
+        padding: 8px 12px;
     }
 
-    ul {
-        padding-left: 15px;
-    }
-
-    ul li {
+    label {
         font-size: 0.95em;
     }
+
+    div[style="margin-top: 1rem;"] {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    div[style="margin-top: 1rem;"] > * {
+        width: 100%;
+    }
+}
+
+/* --------------------------------- */
+/* NUEVO: Estilo para resumen alineado a la izquierda */
+main section {
+    text-align: left;
+}
+
+main section h3 {
+    text-align: center;
+    color: #3a5a40;
+    margin-bottom: 10px;
+}
+
+main section p,
+main section ul,
+main section li {
+    text-align: left;
+    margin: 5px 0;
+    font-size: 1em;
 }
