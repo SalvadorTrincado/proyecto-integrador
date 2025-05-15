@@ -1,0 +1,94 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más moderna */
+    background-color: #e9ecef; /* Gris claro más suave */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    animation: fadeIn 0.5s ease-out; /* Animación sutil al cargar */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.login-container {
+    background-color: #ffffff;
+    padding: 30px; /* Un poco más de espacio interior */
+    border-radius: 10px; /* Bordes más redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
+    width: 350px; /* Un poco más ancho */
+    text-align: center;
+    transition: box-shadow 0.3s ease-in-out; /* Transición suave para la sombra al pasar el ratón */
+}
+
+.login-container:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra más intensa al pasar el ratón */
+}
+
+h2 {
+    color: #343a40; /* Gris oscuro */
+    margin-bottom: 25px; /* Más espacio debajo del título */
+    font-size: 2.2rem; /* Título un poco más grande */
+    font-weight: 500; /* Ligeramente más delgado que el negrita */
+}
+
+.form-group {
+    margin-bottom: 20px; /* Más espacio entre los campos */
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px; /* Más espacio debajo de la etiqueta */
+    color: #495057; /* Gris un poco más claro */
+    font-weight: bold; /* Etiqueta en negrita */
+}
+
+input[type="email"],
+input[type="password"] {
+    width: calc(100% - 20px); /* Ajuste para el padding y el borde */
+    padding: 12px; /* Más espacio dentro del input */
+    border: 1px solid #ced4da; /* Borde gris más claro */
+    border-radius: 6px; /* Bordes más redondeados */
+    box-sizing: border-box;
+    font-size: 1rem; /* Tamaño de fuente legible */
+    transition: border-color 0.3s ease-in-out; /* Transición suave para el borde al enfocar */
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #007bff; /* Borde azul al enfocar */
+    outline: none; /* Elimina el contorno predeterminado del navegador */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Sutil sombra al enfocar */
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px; /* Más padding */
+    border: none;
+    border-radius: 6px; /* Bordes más redondeados */
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.1rem; /* Texto del botón un poco más grande */
+    transition: background-color 0.3s ease-in-out; /* Transición suave para el color de fondo */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:focus {
+    outline: none; /* Elimina el contorno al enfocar el botón */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5); /* Sutil sombra al enfocar el botón */
+}
+
+.error-message {
+    color: red; /* Asegúrate de tener esta línea */
+    margin-top: 15px; /* Puedes ajustar el margen */
+    font-size: 0.9rem; /* Puedes ajustar el tamaño de la fuente */
+    text-align: center; /* O la alineación que prefieras */
+}
