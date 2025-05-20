@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Carga Masiva de Productos</title>
+</head>
+<body>
+<h1>Cargar productos desde archivo CSV</h1>
+
+<form method="post"
+      th:action="@{/admin/productos/carga-masiva}"
+      enctype="multipart/form-data">
+
+    <input type="file" name="archivo" accept=".csv" required />
+    <button type="submit">Cargar productos</button>
+</form>
+</body>
+</html>

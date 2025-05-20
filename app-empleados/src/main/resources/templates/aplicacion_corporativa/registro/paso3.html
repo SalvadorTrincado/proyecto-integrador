@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es"
+      th:replace="~{layout :: layout(contenido = ~{::main})}">
+<th:block th:fragment="main">
+    <main>
+        <nav class="barra-pasos">
+            <a th:href="@{/aplicacion_corporativa/registro/paso1}" class="paso">Paso 1</a>
+            <a th:href="@{/aplicacion_corporativa/registro/paso2}" class="paso">Paso 2</a>
+            <a th:href="@{/aplicacion_corporativa/registro/paso3}" class="paso">Paso 3</a>
+            <a th:href="@{/aplicacion_corporativa/registro/paso4}" class="paso">Paso 4</a>
+            <a th:href="@{/aplicacion_corporativa/registro/resumen}" class="paso">Paso 5</a>
+        </nav>
+
+
+        <h2>Registro de Empleado – Paso 3: Datos profesionales</h2>
+
+
+        <form th:action="@{/aplicacion_corporativa/registro/paso3}" th:object="${datosProfesionales}" method="post">
+
+            <!-- Departamento -->
+            <label for="departamento">Departamento</label>
+            <select id="departamento" th:field="*{departamento}">
+                <option value="">-- Selecciona departamento --</option>
+                <option value="IT">IT</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Ventas">Ventas</option>
+                <option value="RRHH">Recursos Humanos</option>
+            </select>
+            <p th:if="${mostrarErrores} and ${#fields.hasErrors('departamento')}" th:errors="*{departamento}" class="error"></p>
+
+            <!-- Especialidades -->
+            <label>Especialidades</label>
+            <div>
+                <input type="checkbox" class="checkbox-especialidad" th:field="*{especialidadesSeleccionadas}" value="Análisis de datos"> Análisis de datos<br>
+                <input type="checkbox" class="checkbox-especialidad" th:field="*{especialidadesSeleccionadas}" value="Administración de servidores"> Administración de servidores<br>
+                <input type="checkbox" class="checkbox-especialidad" th:field="*{especialidadesSeleccionadas}" value="Seguridad informática"> Seguridad informática<br>
+                <input type="checkbox" class="checkbox-especialidad" th:field="*{especialidadesSeleccionadas}" value="Desarrollo backend"> Desarrollo backend<br>
+                <input type="checkbox" class="checkbox-especialidad" th:field="*{especialidadesSeleccionadas}" value="Desarrollo frontend"> Desarrollo frontend<br>
+                <input type="checkbox" class="checkbox-especialidad" th:field="*{especialidadesSeleccionadas}" value="Diseño UI/UX"> Diseño UI/UX
+            </div>
+
+            <p th:if="${mostrarErrores} and ${#fields.hasErrors('especialidadesSeleccionadas')}" th:errors="*{especialidadesSeleccionadas}" class="error"></p>
+
+            <!-- Botones selección múltiple -->
+            <div class="form-buttons">
+                <button type="button" onclick="seleccionarEspecialidades(true)">Seleccionar todas</button>
+                <button type="button" onclick="seleccionarEspecialidades(false)">Deseleccionar todas</button>
+            </div>
+
+            <!-- Acciones -->
+            <div class="form-buttons">
+                <input type="reset" value="Resetear formulario">
+                <button type="submit">Siguiente</button>
+            </div>
+        </form>
+    </main>
+</th:block>
+
+<script>
+    function seleccionarEspecialidades(marcar) {
+        const checkboxes = document.querySelectorAll('.checkbox-especialidad');
+        checkboxes.forEach(cb => {
+            cb.checked = marcar;
+            // También dispara el evento change por si Thymeleaf lo requiere
+            cb.dispatchEvent(new Event('change'));
+        });
+    }
+</script>
+
+
+
+</html>

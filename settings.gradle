@@ -1,0 +1,2 @@
+rootProject.name = 'proyectos-integrador'
+include 'common', 'app-admin', 'app-empleados'
