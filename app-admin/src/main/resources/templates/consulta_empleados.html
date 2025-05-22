@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Listado de Empleados</title>
+  <link rel="stylesheet" th:href="@{/css/empleados.css}">
+</head>
+<body>
+<div class="container">
+  <h2>Empleados</h2>
+
+  <a th:href="@{/admin/empleados}" class="search-button">Consultar Empleados</a>
+
+  <form method="get" th:action="@{/admin/empleados}">
+    <input type="text" name="filtro" th:value="${filtro}" placeholder="Buscar por nombre...">
+    <select name="ordenarPor">
+      <option value="nombre" th:selected="${ordenarPor == 'nombre'}">Nombre</option>
+      <option value="salario" th:selected="${ordenarPor == 'salario'}">Salario</option>
+      <option value="fechaIngreso" th:selected="${ordenarPor == 'fechaIngreso'}">Fecha de Ingreso</option>
+    </select>
+    <button type="submit">Buscar</button>
+  </form>
+
+  <table>
+    <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Correo</th>
+      <th>Salario</th>
+      <th>Fecha Ingreso</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="empleado : ${empleados}">
+      <td th:text="${empleado.nombre}"></td>
+      <td th:text="${empleado.email}"></td>
+      <td th:text="${empleado.salario}"></td>
+      <td th:text="${#dates.format(empleado.fechaIngreso, 'dd/MM/yyyy')}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <a th:href="@{/admin/area_personal}">Volver al área personal</a>
+</div>
+</body>
+</html>

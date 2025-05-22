@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta de Empleados</title>
+</head>
+<body>
+<h2>Consulta de Empleados</h2>
+<form th:action="@{/admin/resultados-empleados}" method="get">
+  <label>Nombre: <input type="text" name="nombre"/></label><br>
+  <label>Departamento: <input type="text" name="departamento"/></label><br>
+  <label>Salario mínimo: <input type="number" name="salarioMinimo" step="0.01"/></label><br>
+  <label>Salario máximo: <input type="number" name="salarioMaximo" step="0.01"/></label><br>
+  <button type="submit">Buscar</button>
+</form>
+<a th:href="@{/admin/area_personal}">Volver al área personal</a>
+</body>
+</html>

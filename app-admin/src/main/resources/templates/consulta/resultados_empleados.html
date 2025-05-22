@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultados de Empleados</title>
+</head>
+<body>
+<h2>Resultados de la Consulta</h2>
+<table border="1">
+  <thead>
+  <tr>
+    <th>Nombre</th>
+    <th>Apellidos</th>
+    <th>Departamento</th>
+    <th>Salario Base</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="emp : ${empleados}">
+    <td th:text="${emp.nombre}">Nombre</td>
+    <td th:text="${emp.apellidos}">Apellidos</td>
+    <td th:text="${emp.departamento}">Depto</td>
+    <td th:text="${emp.salarioBaseMensual}">Salario</td>
+  </tr>
+  </tbody>
+</table>
+<a th:href="@{/admin/consulta-empleados}">Nueva consulta</a>
+</body>
+</html>
