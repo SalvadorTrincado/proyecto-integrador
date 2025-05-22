@@ -32,10 +32,10 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
                                 "/controller/**",
-                                "/registro/**",
+                                "/templates/**",
                                 "/static/css/**", // Permitimos acceso sin autenticación a todos los archivos CSS
                                 "/js/**",
-                                "/h2/**",
+                                "/h2-console/**",
                                 "/autenticacion/**",
                                 "/aplicacion_corporativa/registro/**"
                         ).permitAll()

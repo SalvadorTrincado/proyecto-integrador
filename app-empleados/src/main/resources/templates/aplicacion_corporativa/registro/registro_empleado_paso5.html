@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es"
+      th:replace="~{layout :: layout(contenido = ~{::main})}">
+<th:block th:fragment="main">
+    <main>
+        <nav class="barra-pasos">
+            <a th:href="@{/registro_empleado_paso1}" class="paso">Paso 1</a>
+            <a th:href="@{/registro_empleado_paso2}" class="paso">Paso 2</a>
+            <a th:href="@{/registro_empleado_paso3}" class="paso">Paso 3</a>
+            <a th:href="@{/registro_empleado_paso4}" class="paso">Paso 4</a>
+            <a th:href="@{/resumen/exito}" class="paso">Paso 5</a>
+        </nav>
+
+        <h2>Resumen del registro de empleado</h2>
+
+        <div class="botones-estilo">
+            <button onclick="activarEstiloDecorado(true)">Decorado</button>
+            <button onclick="activarEstiloDecorado(false)">Sobrio</button>
+        </div>
+
+        <!-- DATOS PERSONALES -->
+        <h3>Datos personales</h3>
+        <p><strong>Nombre:</strong> <span th:text="${registroEmpleadoPaso1DTO.getNombre()}"></span></p>
+        <p><strong>Apellidos:</strong> <span th:text="${registroEmpleadoPaso1DTO.getApellidos()}"></span></p>
+        <p><strong>Género:</strong> <span th:text="${registroEmpleadoPaso1DTO.getGeneroSeleccionado()}"></span></p>
+        <p><strong>Fecha de nacimiento:</strong> <span th:text="${registroEmpleadoPaso1DTO.getFechaNacimiento()}"></span></p>
+        <p><strong>Edad:</strong> <span th:text="${registroEmpleadoPaso1DTO.getEdad()}"></span></p>
+        <p><strong>País de nacimiento:</strong> <span th:text="${registroEmpleadoPaso1DTO.getPaisNacimiento()}"></span></p>
+        <p><strong>Comentarios:</strong> <span th:text="${registroEmpleadoPaso1DTO.getComentarios()}"></span></p>
+
+        <!-- DATOS DE CONTACTO -->
+        <h3>Datos de contacto</h3>
+        <p><strong>Tipo de documento:</strong> <span th:text="${registroEmpleadoPaso2DTO.getTipoDocumento()}"></span></p>
+        <p><strong>Número de documento:</strong> <span th:text="${registroEmpleadoPaso2DTO.getDocumento()}"></span></p>
+        <p><strong>Teléfono:</strong> <span th:text="${registroEmpleadoPaso2DTO.getPrefijoTelefono() + ' ' + registroEmpleadoPaso2DTO.getTelefonoMovil()}"></span></p>
+        <p><strong>Dirección:</strong></p>
+        <ul>
+            <li><strong>Tipo de vía:</strong> <span th:text="${registroEmpleadoPaso2DTO.getTipoViaDireccionPpal()}"></span></li>
+            <li><strong>Nombre vía:</strong> <span th:text="${registroEmpleadoPaso2DTO.getNombreViaDireccionPpal()}"></span></li>
+            <li><strong>Número:</strong> <span th:text="${registroEmpleadoPaso2DTO.getNumeroViaDireccionPpal()}"></span></li>
+            <li><strong>Portal:</strong> <span th:text="${registroEmpleadoPaso2DTO.getPortalDireccionPpal()}"></span></li>
+            <li><strong>Planta:</strong> <span th:text="${registroEmpleadoPaso2DTO.getPlantaDireccionPpal()}"></span></li>
+            <li><strong>Puerta:</strong> <span th:text="${registroEmpleadoPaso2DTO.getPuertaDireccionPpal()}"></span></li>
+            <li><strong>Localidad:</strong> <span th:text="${registroEmpleadoPaso2DTO.getLocalidadDireccionPpal()}"></span></li>
+            <li><strong>Región:</strong> <span th:text="${registroEmpleadoPaso2DTO.getRegionDireccionPpal()}"></span></li>
+            <li><strong>Código postal:</strong> <span th:text="${registroEmpleadoPaso2DTO.getCodigoPostalDireccionPpal()}"></span></li>
+        </ul>
+
+        <!-- DATOS PROFESIONALES -->
+        <h3>Datos profesionales</h3>
+        <p><strong>Departamento:</strong> <span th:text="${registroEmpleadoPaso3DTO.getDepartamento()}"></span></p>
+        <p><strong>Especialidades:</strong></p>
+        <ul>
+            <li th:each="esp : ${registroEmpleadoPaso3DTO.getEspecialidadesSeleccionadas()}" th:text="${esp}"></li>
+        </ul>
+
+        <!-- DATOS ECONÓMICOS -->
+        <h3>Datos económicos</h3>
+        <p><strong>Número de cuenta (IBAN):</strong> <span th:text="${registroEmpleadoPaso4DTO.getNumeroCuenta()}"></span></p>
+        <p><strong>Tipo de contrato:</strong> <span th:text="${registroEmpleadoPaso4DTO.getTipoContrato()}"></span></p>
+        <p><strong>Categoría profesional:</strong> <span th:text="${registroEmpleadoPaso4DTO.getCategoriaProfesional()}"></span></p>
+        <p><strong>Salario base mensual:</strong> <span th:text="${registroEmpleadoPaso4DTO.getSalarioBaseMensual()}"></span></p>
+        <p><strong>Complemento específico:</strong> <span th:text="${registroEmpleadoPaso4DTO.getComplementoMensual()}"></span></p>
+        <p><strong>Devengo paga extra:</strong> <span th:text="${registroEmpleadoPaso4DTO.getDevengoPagaExtra()}"></span></p>
+        <p><strong>Fecha de incorporación:</strong> <span th:text="${registroEmpleadoPaso4DTO.getFechaIncorporacion()}"></span></p>
+
+        <form th:action="@{/resumen/exito-post}" method="post">
+            <input type="submit" value="Aceptar">
+        </form>
+
+    </main>
+</th:block>
+</html>

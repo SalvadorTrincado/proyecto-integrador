@@ -21,4 +21,15 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, UUID> {
                                        @Param("departamento") String departamento,
                                        @Param("salarioMinimo") Double salarioMinimo,
                                        @Param("salarioMaximo") Double salarioMaximo);
+
+    @Query("SELECT e FROM Empleado e WHERE LOWER(e.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))")
+    List<Empleado> buscarEmpleadosPorNombreConteniendo(@Param("nombre") String nombre);
+
+    List<Empleado> findByNombre(String nombre);
+
+    List<Empleado> findByApellidos(String apellidos);
+
+    List<Empleado> findByDepartamento(String departamento);
+
+    List<Empleado> findByEspecialidadesSeleccionadasContaining(String especialidad);
 }

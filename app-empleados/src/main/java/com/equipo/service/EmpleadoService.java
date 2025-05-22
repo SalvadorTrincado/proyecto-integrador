@@ -2,62 +2,99 @@ package com.equipo.service;
 
 import com.equipo.entity.Empleado;
 import com.equipo.repository.EmpleadoRepository;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class EmpleadoService {
 
+    private final EmpleadoRepository empleadoRepository;
+
     @Autowired
-    private EmpleadoRepository empleadoRepository;
-
-    // Crear un empleado de prueba si no hay ninguno
-    @PostConstruct
-    public void crearEmpleadoDePrueba() {
-        if (empleadoRepository.count() == 0) {
-            Empleado e = new Empleado();
-            e.setNombre("Ana");
-            e.setApellidos("López");
-            e.setGeneroSeleccionado("F");
-            e.setFechaNacimiento(LocalDate.of(1993, 1, 1));
-            e.setEdad(30);
-            e.setPaisNacimiento("España");
-            e.setDocumento("12345678A");
-            e.setTipoDocumento("DNI");
-            e.setPrefijoTelefono("+34");
-            e.setTelefonoMovil("600111222");
-            e.setDepartamento("Recursos Humanos");
-            e.setNumeroCuenta("ES7620770024003102575766");
-            e.setTipoContrato("Indefinido");
-            e.setCategoriaProfesional("Administrativo");
-            e.setSalarioBaseMensual(1500.00);
-            e.setComplementoMensual(200.00);
-            e.setDevengoPagaExtra("Junio/Diciembre");
-            e.setFechaIncorporacion(LocalDate.of(2023, 3, 1));
-
-            empleadoRepository.save(e);
-
-            System.out.println("✅ Empleado de prueba creado: " + e.getNombre() + " " + e.getApellidos());
-            System.out.println("🆔 UUID: " + e.getId());
-        }
+    public EmpleadoService(EmpleadoRepository empleadoRepository) {
+        this.empleadoRepository = empleadoRepository;
     }
 
-    /*
-    // Mostrar todos los empleados y sus etiquetas
-    public void mostrarEmpleadosConEtiquetas() {
-        List<Empleado> empleados = empleadoRepository.findAll();
-        System.out.println("📋 Empleados actuales en la base de datos:");
-        for (Empleado e : empleados) {
-            System.out.println("- " + e.getNombre() + " " + e.getApellidos() + " (UUID: " + e.getId() + ")");
-            if (e.getEtiquetas() != null && !e.getEtiquetas().isEmpty()) {
-                e.getEtiquetas().forEach(et -> System.out.println("    • " + et.getNombre()));
-            } else {
-                System.out.println("    • Sin etiquetas");
-            }
-        }
-    }*/
+    // --- Métodos para guardar empleados ---
+    @Transactional
+    public Empleado guardarEmpleado(Empleado empleado) {
+        // Aquí podrías añadir lógica de negocio o validaciones antes de guardar
+        return empleadoRepository.save(empleado);
+    }
+
+    public List<Empleado> buscarYOrdenar(String filtro, String ordenarPor) {
+        List<Empleado> empleados = empleadoRepository.buscarEmpleadosPorNombreConteniendo(filtro);
+
+        return empleados.stream()
+                .sorted((e1, e2) -> {
+                    switch (ordenarPor) {
+                        case "fechaIngreso":
+                            return e1.getFechaIncorporacion().compareTo(e2.getFechaIncorporacion());
+                        case "nombre":
+                        default:
+                            return e1.getNombre().compareToIgnoreCase(e2.getNombre());
+                    }
+                })
+                .toList();
+    }
+
+
+
+    // --- Métodos para obtener empleados ---
+    @Transactional(readOnly = true)
+    public Optional<Empleado> obtenerEmpleadoPorId(UUID id) {
+        return empleadoRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Empleado> obtenerTodosLosEmpleados() {
+        return empleadoRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Empleado> buscarEmpleadosPorNombre(String nombre) {
+        return empleadoRepository.findByNombre(nombre);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Empleado> buscarEmpleadosPorApellidos(String apellidos) {
+        return empleadoRepository.findByApellidos(apellidos);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Empleado> buscarEmpleadosPorDepartamento(String departamento) {
+        return empleadoRepository.findByDepartamento(departamento);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Empleado> buscarEmpleadosPorEspecialidad(String especialidad) {
+        return empleadoRepository.findByEspecialidadesSeleccionadasContaining(especialidad);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Empleado> buscarEmpleadosPorNombreConteniendo(String nombre) {
+        return empleadoRepository.buscarEmpleadosPorNombreConteniendo(nombre);
+    }
+
+    // Puedes añadir más métodos de búsqueda según las necesidades de tu aplicación
+
+    // --- Métodos para eliminar empleados ---
+    @Transactional
+    public void eliminarEmpleado(UUID id) {
+        empleadoRepository.deleteById(id);
+    }
+
+    // --- Otros métodos ---
+    @Transactional(readOnly = true)
+    public boolean existeEmpleado(UUID id) {
+        return empleadoRepository.existsById(id);
+    }
+
+    // Aquí podrías añadir métodos para realizar operaciones más complejas
+    // que involucren varios pasos o validaciones.
 }

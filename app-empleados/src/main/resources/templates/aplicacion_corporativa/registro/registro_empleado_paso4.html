@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es"
+      th:replace="~{layout :: layout(contenido = ~{::main})}">
+<head>
+  <link rel="stylesheet" th:href="@{/css/registro_empleado_paso4.css}">
+</head>
+<th:block th:fragment="main">
+  <main>
+    <nav class="barra-pasos">
+      <a th:href="@{/registro_empleado_paso1}" class="paso">Paso 1</a>
+      <a th:href="@{/registro_empleado_paso2}" class="paso">Paso 2</a>
+      <a th:href="@{/registro_empleado_paso3}" class="paso">Paso 3</a>
+      <a th:href="@{/registro_empleado_paso4}" class="paso paso-activo">Paso 4</a>
+      <a th:href="@{/resumen/exito}" class="paso">Paso 5</a>
+    </nav>
+
+    <h2>Registro de Empleado – Paso 4: Datos económicos</h2>
+
+    <form th:action="@{/registro_empleado_paso4-post}" th:object="${registroEmpleadoPaso4DTO}" method="post">
+
+      <div>
+        <label for="numeroCuenta">Número de cuenta (IBAN)</label>
+        <input type="text" id="numeroCuenta" th:field="*{numeroCuenta}">
+        <p th:if="${#fields.hasErrors('numeroCuenta')}" th:errors="*{numeroCuenta}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="tipoContrato">Tipo de contrato</label>
+        <select id="tipoContrato" th:field="*{tipoContrato}">
+          <option value="">-- Selecciona tipo --</option>
+          <option value="Indefinido">Indefinido</option>
+          <option value="Temporal">Temporal</option>
+          <option value="Formación">Formación</option>
+          <option value="Prácticas">Prácticas</option>
+        </select>
+        <p th:if="${#fields.hasErrors('tipoContrato')}" th:errors="*{tipoContrato}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="categoriaProfesional">Categoría profesional</label>
+        <input type="text" id="categoriaProfesional" th:field="*{categoriaProfesional}">
+        <p th:if="${#fields.hasErrors('categoriaProfesional')}" th:errors="*{categoriaProfesional}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="salarioBaseMensual">Salario base mensual (€)</label>
+        <input type="number" step="0.01" id="salarioBaseMensual" th:field="*{salarioBaseMensual}">
+        <p th:if="${#fields.hasErrors('salarioBaseMensual')}" th:errors="*{salarioBaseMensual}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="complementoMensual">Complemento específico mensual (€)</label>
+        <input type="number" step="0.01" id="complementoMensual" th:field="*{complementoMensual}">
+        <p th:if="${#fields.hasErrors('complementoMensual')}" th:errors="*{complementoMensual}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="devengoPagaExtra">Devengo de paga extra</label>
+        <select id="devengoPagaExtra" th:field="*{devengoPagaExtra}">
+          <option value="">-- Selecciona opción --</option>
+          <option value="Mensual">Mensual</option>
+          <option value="Semestral">Semestral</option>
+          <option value="Anual">Anual</option>
+        </select>
+        <p th:if="${#fields.hasErrors('devengoPagaExtra')}" th:errors="*{devengoPagaExtra}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="fechaIncorporacion">Fecha de incorporación</label>
+        <input type="date" id="fechaIncorporacion" th:field="*{fechaIncorporacion}">
+        <p th:if="${#fields.hasErrors('fechaIncorporacion')}" th:errors="*{fechaIncorporacion}" class="error"></p>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <button type="button" onclick="window.location.href='/registro_empleado_paso3'">Anterior</button>
+        <input type="reset" value="Resetear">
+        <button type="submit">Finalizar registro</button>
+      </div>
+    </form>
+  </main>
+</th:block>
+</html>

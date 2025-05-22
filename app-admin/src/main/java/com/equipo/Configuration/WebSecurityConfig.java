@@ -24,10 +24,10 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
-                                new AntPathRequestMatcher("/h2/**"),
-                                new AntPathRequestMatcher("/login/administrador"),
-                                new AntPathRequestMatcher("/admin/area_personal"),
-                                new AntPathRequestMatcher("/logout")
+                                "/h2-console/**",
+                                "/login/administrador",
+                                "/admin/area_personal",
+                                "/logout"
                         ).permitAll()
                         .anyRequest().permitAll() // Permitir todas las peticiones sin autenticación
                 )
@@ -40,7 +40,7 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .csrf((csrf) -> csrf.ignoringRequestMatchers(
-                        new AntPathRequestMatcher("/h2/**")
+                        "/h2-console/**"
                 ))
                 .headers((headers) -> headers
                         .frameOptions((frameOptions) -> frameOptions.sameOrigin())

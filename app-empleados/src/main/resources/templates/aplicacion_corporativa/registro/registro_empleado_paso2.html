@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es"
+      th:replace="~{layout :: layout(contenido = ~{::main})}">
+<head>
+  <link rel="stylesheet" th:href="@{/css/registro_empleado_paso2.css}">
+</head>
+<th:block th:fragment="main">
+  <main>
+    <nav class="barra-pasos">
+      <a th:href="@{/registro_empleado_paso1}" class="paso">Paso 1</a>
+      <a th:href="@{/registro_empleado_paso2}" class="paso paso-activo">Paso 2</a>
+      <a th:href="@{/registro_empleado_paso3}" class="paso">Paso 3</a>
+      <a th:href="@{/registro_empleado_paso4}" class="paso">Paso 4</a>
+      <a th:href="@{/resumen/exito}" class="paso">Paso 5</a>
+    </nav>
+
+    <h2>Registro de Empleado – Paso 2: Datos de contacto</h2>
+
+    <form th:action="@{/registro_empleado_paso2-post}" th:object="${registroEmpleadoPaso2DTO}" method="post">
+
+      <div>
+        <label>Tipo de documento</label>
+        <input type="radio" th:field="*{tipoDocumento}" value="DNI" id="tipoDocumento_DNI"> <label for="tipoDocumento_DNI">DNI</label>
+        <input type="radio" th:field="*{tipoDocumento}" value="NIE" id="tipoDocumento_NIE"> <label for="tipoDocumento_NIE">NIE</label>
+        <input type="radio" th:field="*{tipoDocumento}" value="Pasaporte" id="tipoDocumento_Pasaporte"> <label for="tipoDocumento_Pasaporte">Pasaporte</label>
+        <p th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="documento">Número de documento</label>
+        <input type="text" id="documento" th:field="*{documento}">
+        <p th:if="${#fields.hasErrors('documento')}" th:errors="*{documento}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="prefijoTelefono">Prefijo telefónico</label>
+        <select id="prefijoTelefono" th:field="*{prefijoTelefono}">
+          <option value="">-- Selecciona prefijo --</option>
+          <option value="+34">+34</option>
+          <option value="+33">+33</option>
+          <option value="+52">+52</option>
+          <option value="+54">+54</option>
+        </select>
+        <p th:if="${#fields.hasErrors('prefijoTelefono')}" th:errors="*{prefijoTelefono}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="telefonoMovil">Teléfono móvil</label>
+        <input type="text" id="telefonoMovil" th:field="*{telefonoMovil}">
+        <p th:if="${#fields.hasErrors('telefonoMovil')}" th:errors="*{telefonoMovil}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="tipoViaDireccionPpal">Tipo de vía</label>
+        <select id="tipoViaDireccionPpal" th:field="*{tipoViaDireccionPpal}">
+          <option value="">-- Selecciona tipo --</option>
+          <option value="Calle">Calle</option>
+          <option value="Avenida">Avenida</option>
+          <option value="Paseo">Paseo</option>
+        </select>
+        <p th:if="${#fields.hasErrors('tipoViaDireccionPpal')}" th:errors="*{tipoViaDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="nombreViaDireccionPpal">Nombre de la vía</label>
+        <input type="text" id="nombreViaDireccionPpal" th:field="*{nombreViaDireccionPpal}">
+        <p th:if="${#fields.hasErrors('nombreViaDireccionPpal')}" th:errors="*{nombreViaDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="numeroViaDireccionPpal">Número</label>
+        <input type="text" id="numeroViaDireccionPpal" th:field="*{numeroViaDireccionPpal}">
+        <p th:if="${#fields.hasErrors('numeroViaDireccionPpal')}" th:errors="*{numeroViaDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="portalDireccionPpal">Portal</label>
+        <input type="text" id="portalDireccionPpal" th:field="*{portalDireccionPpal}">
+        <p th:if="${#fields.hasErrors('portalDireccionPpal')}" th:errors="*{portalDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="plantaDireccionPpal">Planta</label>
+        <input type="text" id="plantaDireccionPpal" th:field="*{plantaDireccionPpal}">
+        <p th:if="${#fields.hasErrors('plantaDireccionPpal')}" th:errors="*{plantaDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="puertaDireccionPpal">Puerta</label>
+        <input type="text" id="puertaDireccionPpal" th:field="*{puertaDireccionPpal}">
+        <p th:if="${#fields.hasErrors('puertaDireccionPpal')}" th:errors="*{puertaDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="localidadDireccionPpal">Localidad</label>
+        <input type="text" id="localidadDireccionPpal" th:field="*{localidadDireccionPpal}">
+        <p th:if="${#fields.hasErrors('localidadDireccionPpal')}" th:errors="*{localidadDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="regionDireccionPpal">Región / Comunidad / Estado</label>
+        <input type="text" id="regionDireccionPpal" th:field="*{regionDireccionPpal}">
+        <p th:if="${#fields.hasErrors('regionDireccionPpal')}" th:errors="*{regionDireccionPpal}" class="error"></p>
+      </div>
+
+      <div>
+        <label for="codigoPostalDireccionPpal">Código Postal</label>
+        <input type="text" id="codigoPostalDireccionPpal" th:field="*{codigoPostalDireccionPpal}">
+        <p th:if="${#fields.hasErrors('codigoPostalDireccionPpal')}" th:errors="*{codigoPostalDireccionPpal}" class="error"></p>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <button type="button" onclick="window.location.href='/registro_empleado_paso1'">Anterior</button>
+        <input type="reset" value="Resetear">
+        <button type="submit">Siguiente</button>
+      </div>
+    </form>
+  </main>
+</th:block>
+</html>

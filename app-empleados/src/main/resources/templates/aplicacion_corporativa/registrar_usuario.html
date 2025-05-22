@@ -48,7 +48,7 @@
         <!-- Errores generales de validación del DTO -->
         <div class="error-message general-error" th:if="${#fields.hasGlobalErrors()}">
             <ul>
-                <li th:each="err : ${#fields.globalErrors()}" th:text="${err.defaultMessage}"></li>
+                <li th:each="err : ${#fields.globalErrors()}" th:text="${err}"></li>
             </ul>
         </div>
 
