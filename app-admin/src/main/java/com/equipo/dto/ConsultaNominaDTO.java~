@@ -1,0 +1,4 @@
+package com.equipo.dto;
+
+public class ConsultaNominaDTO {
+}

@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<<<<<<< HEAD
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle de Nómina</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/detalle_nomina.css}">
+=======
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -31,17 +38,30 @@
     .error-message { background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom:15px;}
     .success-message { background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom:15px;}
 </style>
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
 </head>
 <body>
 <div class="container">
     <h1>Detalle de Nómina</h1>
 
+<<<<<<< HEAD
+    <div th:if="${param.error}" class="error-message"> <strong th:text="${param.error[0]}">Error</strong>
+    </div>
+    <div th:if="${param.exito}" class="success-message"> <strong th:text="${param.exito[0]}"></strong>
+    </div>
+    <div th:if="${error}" class="error-message"> <strong th:text="${error}"></strong>
+    </div>
+    <div th:if="${exito}" class="success-message"> <strong th:text="${exito}"></strong>
+    </div>
+
+=======
     <div th:if="${error}" class="error-message">
         <strong th:text="${error}"></strong>
     </div>
     <div th:if="${exito}" class="success-message">
         <strong th:text="${exito}"></strong>
     </div>
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
 
     <div th:if="${nomina}">
         <h2>Datos Generales</h2>
@@ -55,7 +75,11 @@
                 <span th:text="${nomina.nombreCompletoEmpleado + ' (' + nomina.identificacionEmpleado + ')'}"></span>
             </div>
             <div class="info-item">
+<<<<<<< HEAD
+                <strong>Período:</strong>
+=======
                 <strong>Periodo:</strong>
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
                 <span th:text="${#temporals.format(nomina.fechaInicioPeriodo, 'dd/MM/yyyy') + ' - ' + #temporals.format(nomina.fechaFinPeriodo, 'dd/MM/yyyy')}"></span>
             </div>
             <div class="info-item">
@@ -72,7 +96,11 @@
             </div>
         </div>
 
+<<<<<<< HEAD
+        <h2>Datos Empresa (Captura)</h2>
+=======
         <h2>Datos Empresa (Snapshot)</h2>
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
         <div class="info-grid">
             <div class="info-item">
                 <strong>Empresa:</strong>
@@ -95,14 +123,22 @@
                 <th>Concepto</th>
                 <th>Tipo</th>
                 <th>Porcentaje (%)</th>
+<<<<<<< HEAD
+                <th class="text-right">Importe (€)</th>
+=======
                 <th class="text-right">Cantidad (€)</th>
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
             </tr>
             </thead>
             <tbody>
             <tr th:each="linea : ${nomina.lineasNomina}">
                 <td th:text="${linea.concepto}"></td>
+<<<<<<< HEAD
+                <td th:text="${linea.tipo.name()}"></td> <td class="text-right" th:text="${linea.porcentaje != null ? #numbers.formatDecimal(linea.porcentaje, 1, 'COMMA', 2, 'POINT') : ''}"></td>
+=======
                 <td th:text="${linea.tipo.name()}"></td>
                 <td class.text-right th:text="${linea.porcentaje != null ? #numbers.formatDecimal(linea.porcentaje, 1, 'COMMA', 2, 'POINT') : ''}"></td>
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
                 <td class="text-right" th:text="${#numbers.formatDecimal(linea.cantidad, 1, 'COMMA', 2, 'POINT')}"></td>
             </tr>
             </tbody>
@@ -147,7 +183,11 @@
         <div class="btn-actions">
             <a th:href="@{/admin/nominas/consultar}" class="btn btn-secondary">Volver a la Lista</a>
             <th:block th:with="hoy=${T(java.time.LocalDate).now()}, ultimoDiaMesAnterior=${hoy.withDayOfMonth(1).minusDays(1)}">
+<<<<<<< HEAD
+                <a th:if="${!nomina.fechaFinPeriodo.isBefore(ultimoDiaMesAnterior)}"
+=======
                 <a th:if="${nomina.fechaFinPeriodo.isAfter(ultimoDiaMesAnterior) || nomina.fechaFinPeriodo.isEqual(ultimoDiaMesAnterior.plusMonths(1).withDayOfMonth(1).minusDays(1))}"
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
                    th:href="@{/admin/nominas/modificar/{id}(id=${nomina.id})}" class="btn btn-primary">Modificar Nómina</a>
             </th:block>
         </div>
@@ -159,9 +199,12 @@
     </div>
 </div>
 </body>
+<<<<<<< HEAD
+=======
 </html></title>
 </head>
 <body>
 
 </body>
+>>>>>>> 160e674 (HECHO: nominas, falta eliminacion y config css)
 </html>

@@ -1,0 +1,170 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #0056b3;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.filter-form {
+    background-color: #f8f9fa;
+    padding: 20px; /* Más padding */
+    border-radius: 5px;
+    margin-bottom: 25px;
+    border: 1px solid #dee2e6;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Más espacio */
+    align-items: flex-end;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 220px; /* Un poco más ancho */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px; /* Más espacio */
+    font-weight: bold;
+}
+
+.form-group input[type="date"],
+.form-group select {
+    width: 100%;
+    padding: 10px; /* Inputs más grandes */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 5px; /* Para alinear con inputs si están en diferentes líneas de flex-wrap */
+}
+.btn-primary { background-color: #007bff; color: white; }
+.btn-primary:hover { background-color: #0056b3; }
+.btn-secondary { background-color: #6c757d; color: white; }
+.btn-secondary:hover { background-color: #5a6268; }
+.btn-success { background-color: #28a745; color: white; }
+.btn-success:hover { background-color: #1e7e34; }
+.btn-info { background-color: #17a2b8; color: white; }
+.btn-info:hover { background-color: #117a8b; }
+.btn-danger { background-color: #dc3545; color: white; }
+.btn-danger:hover { background-color: #bd2130;}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra sutil para la tabla */
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px; /* Más padding en celdas */
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background-color: #e9ecef;
+    font-weight: bold;
+    text-transform: uppercase; /* Mayúsculas para encabezados */
+    font-size: 0.9em;
+}
+
+.actions a, .actions button {
+    margin-right: 5px;
+    font-size: 0.9em;
+    padding: 6px 10px; /* Botones de acción un poco más grandes */
+}
+.actions form { /* Para que los botones de form se alineen bien */
+    margin-bottom: 0;
+    display: inline-block; /* Asegura que el form no ocupe toda la línea */
+}
+
+
+.pagination {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.pagination a, .pagination span {
+    margin: 0 5px;
+    padding: 8px 12px; /* Paginación más grande */
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #007bff;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+}
+.pagination a:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.pagination .active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination .disabled {
+    color: #adb5bd; /* Gris más claro para deshabilitado */
+    pointer-events: none;
+    border-color: #e9ecef;
+}
+
+.no-results {
+    text-align: center;
+    padding: 25px;
+    color: #777;
+    font-style: italic;
+    background-color: #f8f9fa;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+.alert {
+    padding: 15px; /* Más padding para alertas */
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+}
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
