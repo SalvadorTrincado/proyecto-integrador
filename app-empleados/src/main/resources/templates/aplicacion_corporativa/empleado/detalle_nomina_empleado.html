@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle de Mi Nómina</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/detalle_nomina.css}">
+</head>
+<body>
+<div class="container">
+  <h1>Detalle de Mi Nómina</h1>
+
+  <div th:if="${param.errorGlobal}" class="error-message">
+    <strong th:text="${param.errorGlobal[0]}">Error</strong>
+  </div>
+  <div th:if="${errorGlobal}" class="error-message">
+    <strong th:text="${errorGlobal}"></strong>
+  </div>
+
+
+  <div th:if="${nomina}">
+    <h2>Datos Generales</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <strong>ID Nómina:</strong>
+        <span th:text="${#strings.substring(nomina.id, 0, 8) + '...'}"></span>
+      </div>
+      <div class="info-item">
+        <strong>Empleado:</strong>
+        <span th:text="${nomina.nombreCompletoEmpleado}"></span> </div>
+      <div class="info-item">
+        <strong>Período:</strong>
+        <span th:text="${#temporals.format(nomina.fechaInicioPeriodo, 'dd/MM/yyyy') + ' - ' + #temporals.format(nomina.fechaFinPeriodo, 'dd/MM/yyyy')}"></span>
+      </div>
+      <div class="info-item">
+        <strong>Puesto Profesional:</strong>
+        <span th:text="${nomina.puestoProfesionalEmpleado}"></span>
+      </div>
+      <div class="info-item">
+        <strong>Departamento:</strong>
+        <span th:text="${nomina.departamentoEmpleado}"></span>
+      </div>
+    </div>
+
+    <h2>Datos Empresa (Captura)</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <strong>Empresa:</strong>
+        <span th:text="${nomina.nombreEmpresa}"></span>
+      </div>
+      <div class="info-item">
+        <strong>CIF:</strong>
+        <span th:text="${nomina.cifEmpresa}"></span>
+      </div>
+      <div class="info-item" th:if="${nomina.direccionEmpresa}">
+        <strong>Dirección Empresa:</strong>
+        <span th:text="${nomina.direccionEmpresa}"></span>
+      </div>
+    </div>
+
+    <h2>Líneas de Nómina</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>Concepto</th>
+        <th>Tipo</th>
+        <th>Porcentaje (%)</th>
+        <th class="text-right">Importe (€)</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="linea : ${nomina.lineasNomina}">
+        <td th:text="${linea.concepto}"></td>
+        <td th:text="${linea.tipo.name()}"></td>
+        <td class="text-right" th:text="${linea.porcentaje != null ? #numbers.formatDecimal(linea.porcentaje, 1, 'COMMA', 2, 'POINT') : ''}"></td>
+        <td class="text-right" th:text="${#numbers.formatDecimal(linea.cantidad, 1, 'COMMA', 2, 'POINT')}"></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h2>Totales</h2>
+    <table>
+      <tbody>
+      <tr class="total-row">
+        <td colspan="3" class="text-right"><strong>Total Devengos:</strong></td>
+        <td class="text-right" th:text="${#numbers.formatDecimal(nomina.totalDevengos, 1, 'COMMA', 2, 'POINT') + ' €'}"></td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="3" class="text-right"><strong>Total Deducciones:</strong></td>
+        <td class="text-right" th:text="${#numbers.formatDecimal(nomina.totalDeducciones, 1, 'COMMA', 2, 'POINT') + ' €'}"></td>
+      </tr>
+      <tr class="total-row" style="font-size: 1.2em;">
+        <td colspan="3" class="text-right"><strong>Neto a Percibir:</strong></td>
+        <td class="text-right" th:text="${#numbers.formatDecimal(nomina.netoAPercibir, 1, 'COMMA', 2, 'POINT') + ' €'}"></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div th:if="${nomina.brutoAcumuladoAnual != null || nomina.retencionesAcumuladasAnual != null || nomina.percibidoAcumuladoAnual != null}">
+      <h2>Acumulados Anuales (Opcional)</h2>
+      <div class="info-grid">
+        <div class="info-item" th:if="${nomina.brutoAcumuladoAnual != null}">
+          <strong>Bruto Acumulado:</strong>
+          <span th:text="${#numbers.formatDecimal(nomina.brutoAcumuladoAnual, 1, 'COMMA', 2, 'POINT') + ' €'}"></span>
+        </div>
+        <div class="info-item" th:if="${nomina.retencionesAcumuladasAnual != null}">
+          <strong>Retenciones Acumuladas:</strong>
+          <span th:text="${#numbers.formatDecimal(nomina.retencionesAcumuladasAnual, 1, 'COMMA', 2, 'POINT') + ' €'}"></span>
+        </div>
+        <div class="info-item" th:if="${nomina.percibidoAcumuladoAnual != null}">
+          <strong>Percibido Acumulado:</strong>
+          <span th:text="${#numbers.formatDecimal(nomina.percibidoAcumuladoAnual, 1, 'COMMA', 2, 'POINT') + ' €'}"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-actions">
+      <a th:href="@{/empleado/nominas/consultar}" class="btn btn-secondary">Volver a Mis Nóminas</a>
+    </div>
+
+  </div>
+  <div th:unless="${nomina}">
+    <p>No se ha podido cargar la información de la nómina o no tiene permiso para verla.</p>
+    <a th:href="@{/empleado/nominas/consultar}" class="btn btn-secondary">Volver a Mis Nóminas</a>
+  </div>
+</div>
+</body>
+</html>

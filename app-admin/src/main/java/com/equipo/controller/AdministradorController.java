@@ -65,10 +65,13 @@ public class AdministradorController {
         }
     }
 
+    // Se comenta o elimina este método para evitar el conflicto con Spring Security y el AutenticacionController.
+    // Spring Security ya gestiona la URL /logout definida en WebSecurityConfig.
+    /*
     @PostMapping("/logout") // Procesa el cierre de sesión del administrador
     public String cerrarSesion(HttpSession sesion) {
         sesion.invalidate(); // Invalida la sesión actual
         return "redirect:/login/administrador"; // Redirige a la página de login
     }
-
+    */
 }

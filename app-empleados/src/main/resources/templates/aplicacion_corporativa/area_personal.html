@@ -6,7 +6,7 @@
     <title>Área Personal</title>
     <link rel="stylesheet" th:href="@{/css/area_personal.css}">
     <style>
-        .registration-prompt a {
+        .registration-prompt a, .employee-actions a { /* Estilo común para enlaces de acción */
             display: inline-block;
             margin-top: 15px;
             padding: 10px 20px;
@@ -16,7 +16,7 @@
             border-radius: 5px;
             transition: background-color 0.3s ease;
         }
-        .registration-prompt a:hover {
+        .registration-prompt a:hover, .employee-actions a:hover {
             background-color: #588157;
         }
         .message-global {
@@ -27,14 +27,14 @@
             font-weight: bold;
         }
         .success-message-global {
-            color: #155724; /* Color de texto verde oscuro */
-            background-color: #d4edda; /* Fondo verde claro */
-            border: 1px solid #c3e6cb; /* Borde verde más claro */
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
         }
         .error-message-global {
-            color: #721c24; /* Color de texto rojo oscuro */
-            background-color: #f8d7da; /* Fondo rojo claro */
-            border: 1px solid #f5c6cb; /* Borde rojo más claro */
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
@@ -48,20 +48,19 @@
 <p th:if="${usuarioId != null}">Tu ID de usuario es: <span th:text="${usuarioId}"></span></p>
 <p>Email: <span sec:authentication="name"></span></p>
 
-
 <div th:if="${esEmpleado == false}" class="registration-prompt">
     <p th:if="${mensajeOpcionRegistro}" th:text="${mensajeOpcionRegistro}"></p>
     <p>Parece que aún no has completado tu perfil de empleado.</p>
     <a th:href="@{/registro_empleado_paso1}">Completar Registro de Empleado</a>
 </div>
 
-<div th:if="${esEmpleado == true}">
+<div th:if="${esEmpleado == true}" class="employee-actions">
     <p>¡Tu perfil de empleado está completo!</p>
-    <p><a href="#">Consultar Mis Nóminas</a> (Funcionalidad futura)</p>
+    <a th:href="@{/empleado/nominas/consultar}">Consultar Mis Nóminas</a>
 </div>
 
 <form th:action="@{/logout}" method="post" style="margin-top: 20px;">
-    <button type="submit">Desconectar</button>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/> <button type="submit">Desconectar</button>
 </form>
 </body>
 </html>

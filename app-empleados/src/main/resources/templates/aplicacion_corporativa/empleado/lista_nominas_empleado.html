@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Nóminas</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/lista_nominas.css}">
+  <style>
+    /* Ajustes específicos si son necesarios para la vista de empleado */
+    .filter-form { display: none; } /* Ocultar filtros si no aplican para empleado */
+    .btn-success { display: none; } /* Ocultar botón de crear nómina */
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Mis Nóminas</h1>
+
+  <div th:if="${param.errorGlobal}" class="alert alert-danger">
+    <strong th:text="${param.errorGlobal[0]}">Error</strong>
+  </div>
+  <div th:if="${errorGlobal}" class="alert alert-danger">
+    <strong th:text="${errorGlobal}"></strong>
+  </div>
+  <div th:if="${param.mensajeExitoGlobal}" class="alert alert-success">
+    <strong th:text="${param.mensajeExitoGlobal[0]}"></strong>
+  </div>
+  <div th:if="${mensajeExitoGlobal}" class="alert alert-success">
+    <strong th:text="${mensajeExitoGlobal}"></strong>
+  </div>
+
+
+  <div th:if="${nominas != null && !nominas.isEmpty()}">
+    <table>
+      <thead>
+      <tr>
+        <th>ID Nómina (corto)</th>
+        <th>Período</th>
+        <th style="text-align: right;">Neto a Percibir</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="nomina : ${nominas.content}">
+        <td th:text="${#strings.substring(nomina.id, 0, 8) + '...'}"></td>
+        <td th:text="${#temporals.format(nomina.fechaInicioPeriodo, 'dd/MM/yy')} + ' - ' + ${#temporals.format(nomina.fechaFinPeriodo, 'dd/MM/yy')}"></td>
+        <td style="text-align: right;" th:text="${#numbers.formatDecimal(nomina.netoAPercibir, 1, 'COMMA', 2, 'POINT') + ' €'}"></td>
+        <td class="actions">
+          <a th:href="@{/empleado/nominas/detalle/{id}(id=${nomina.id})}" class="btn btn-info btn-sm">Detalle</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination" th:if="${nominas.totalPages > 0}">
+      <th:block th:if="${nominas.hasPrevious()}">
+        <a th:with="baseUrlAnterior=@{/empleado/nominas/consultar(page=${nominas.number - 1}, size=${nominas.size})}"
+           th:href="${baseUrlAnterior + pageableParams}">
+          &laquo; Anterior
+        </a>
+      </th:block>
+      <span th:unless="${nominas.hasPrevious()}" class="disabled">&laquo; Anterior</span>
+
+      <th:block th:each="i : ${#numbers.sequence(0, nominas.totalPages - 1)}">
+        <th:block th:if="${i == nominas.number}">
+          <span class="active" th:text="${i + 1}"></span>
+        </th:block>
+        <th:block th:unless="${i == nominas.number}">
+          <a th:with="baseUrlPagina=@{/empleado/nominas/consultar(page=${i}, size=${nominas.size})}"
+             th:href="${baseUrlPagina + pageableParams}"
+             th:text="${i + 1}">
+          </a>
+        </th:block>
+      </th:block>
+
+      <th:block th:if="${nominas.hasNext()}">
+        <a th:with="baseUrlSiguiente=@{/empleado/nominas/consultar(page=${nominas.number + 1}, size=${nominas.size})}"
+           th:href="${baseUrlSiguiente + pageableParams}">
+          Siguiente &raquo;
+        </a>
+      </th:block>
+      <span th:unless="${nominas.hasNext()}" class="disabled">Siguiente &raquo;</span>
+    </div>
+
+  </div>
+  <div th:if="${nominas == null || nominas.isEmpty()}" class="no-results">
+    <p>No se encontraron nóminas.</p>
+  </div>
+  <div style="margin-top: 20px;">
+    <a th:href="@{/aplicacion_corporativa/area_personal}" class="btn btn-secondary">Volver al Área Personal</a>
+  </div>
+</div>
+</body>
+</html>
