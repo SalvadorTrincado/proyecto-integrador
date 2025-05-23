@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime; // Importar LocalDateTime
 import java.util.UUID;
 
 // Define la clase como una entidad de JPA
@@ -19,6 +20,7 @@ public class Usuario {
     // El valor de 'id' se genera automáticamente
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", columnDefinition = "VARCHAR(36)")
     private UUID id;
 
     // Especifica que el campo 'email' no puede ser nulo y debe ser único
@@ -28,4 +30,14 @@ public class Usuario {
     // Especifica que el campo 'password' no puede ser nulo
     @Column(nullable = false)
     private String password;
+
+    // Nuevos campos para el bloqueo de cuenta
+    @Column(name = "intentos_fallidos", columnDefinition = "integer default 0")
+    private int intentosFallidos = 0;
+
+    @Column(name = "cuenta_bloqueada", columnDefinition = "boolean default false")
+    private boolean cuentaBloqueada = false;
+
+    @Column(name = "fecha_bloqueo")
+    private LocalDateTime fechaBloqueo; // Para saber cuándo se bloqueó y, opcionalmente, cuándo desbloquear
 }

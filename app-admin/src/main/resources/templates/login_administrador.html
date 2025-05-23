@@ -5,6 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar Sesión Administrador</title>
   <link rel="stylesheet" type="text/css" th:href="@{/css/login_administrador.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    /* Estilos adicionales para el contenedor de contraseña y el icono */
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center; /* Para alinear el input y el icono si es necesario */
+    }
+
+    .password-container input[type="password"],
+    .password-container input[type="text"] { /* Estilo para cuando se cambia a texto */
+      flex-grow: 1; /* El input ocupa el espacio disponible */
+      /* Los siguientes son copiados de tu login_administrador.css para consistencia */
+      width: calc(100% - 20px);
+      padding: 12px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 1rem;
+      transition: border-color 0.3s ease-in-out;
+      padding-right: 40px; /* Espacio para el icono del ojo */
+    }
+
+    .password-container input[type="password"]:focus,
+    .password-container input[type="text"]:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px; /* Ajusta según el padding del input */
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #777; /* Color del icono */
+      z-index: 10; /* Para asegurar que esté sobre el input */
+    }
+  </style>
 </head>
 <body>
 <div class="login-container">
@@ -17,10 +57,38 @@
     </div>
     <div class="form-group">
       <label for="password">Contraseña:</label>
-      <input type="password" id="password" name="password" th:field="*{clave}">
+      <div class="password-container">
+        <input type="password" id="password" name="password" th:field="*{clave}">
+        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+      </div>
     </div>
     <button type="submit">Iniciar Sesión</button>
-    <div th:if="${error}" class="error-message" th:text="${error}"></div> </form>
+    <div th:if="${error}" class="error-message" th:text="${error}"></div>
+  </form>
 </div>
+
+<script>
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('password');
+
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      // Cambiar el icono
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+    // Inicializar el icono
+    if (passwordInput.getAttribute('type') === 'password') {
+      togglePassword.classList.remove('fa-eye-slash');
+      togglePassword.classList.add('fa-eye');
+    } else {
+      togglePassword.classList.remove('fa-eye');
+      togglePassword.classList.add('fa-eye-slash');
+    }
+  }
+</script>
+
 </body>
 </html>

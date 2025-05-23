@@ -38,7 +38,7 @@ public class EtiquetaAdminController {
     public String listarEtiquetas(Model model) {
         model.addAttribute("etiquetas", etiquetaService.obtenerTodasLasEtiquetas());
         model.addAttribute("etiqueta", new Etiqueta()); // Para el formulario de nueva etiqueta
-        return "admin/etiquetas/gestion_etiquetas"; // Vista para listar y crear etiquetas
+        return "admin/etiquetas/gestion_etiquetas";
     }
 
     @PostMapping("/crear")
@@ -46,7 +46,6 @@ public class EtiquetaAdminController {
                                 BindingResult result,
                                 RedirectAttributes redirectAttributes, Model model) {
         if (result.hasErrors()) {
-            // Si hay errores de validación básicos (ej. @NotBlank en la entidad Etiqueta si se añade)
             model.addAttribute("etiquetas", etiquetaService.obtenerTodasLasEtiquetas());
             return "admin/etiquetas/gestion_etiquetas";
         }
@@ -68,8 +67,8 @@ public class EtiquetaAdminController {
             return "redirect:/admin/etiquetas";
         }
         model.addAttribute("etiqueta", etiqueta);
-        model.addAttribute("etiquetas", etiquetaService.obtenerTodasLasEtiquetas()); // Para la lista
-        return "admin/etiquetas/gestion_etiquetas"; // Reutilizar la misma vista, pero con datos para editar
+        model.addAttribute("etiquetas", etiquetaService.obtenerTodasLasEtiquetas());
+        return "admin/etiquetas/gestion_etiquetas";
     }
 
 
@@ -92,7 +91,7 @@ public class EtiquetaAdminController {
         List<Etiqueta> todasLasEtiquetas = etiquetaService.obtenerTodasLasEtiquetas();
         model.addAttribute("empleados", empleados);
         model.addAttribute("todasLasEtiquetas", todasLasEtiquetas);
-        model.addAttribute("empleadoId", null); // Para el selector de empleado
+        model.addAttribute("empleadoId", null);
         model.addAttribute("etiquetasSeleccionadasIds", new HashSet<UUID>());
         return "admin/etiquetas/asignar_empleado";
     }
@@ -109,7 +108,7 @@ public class EtiquetaAdminController {
                 .map(Etiqueta::getId)
                 .collect(Collectors.toSet());
 
-        model.addAttribute("empleados", empleadoService.obtenerTodosLosEmpleados()); // Para el selector, aunque ya venga uno
+        model.addAttribute("empleados", empleadoService.obtenerTodosLosEmpleados());
         model.addAttribute("empleadoSeleccionado", empleado);
         model.addAttribute("empleadoId", empleadoId);
         model.addAttribute("todasLasEtiquetas", todasLasEtiquetas);
@@ -128,6 +127,41 @@ public class EtiquetaAdminController {
             redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
         }
         return "redirect:/admin/etiquetas/asignar/" + empleadoId;
+    }
+
+    // --- Etiquetado Masivo ---
+    @GetMapping("/masivo")
+    public String mostrarFormularioEtiquetadoMasivo(Model model) {
+        model.addAttribute("todosLosEmpleados", empleadoService.obtenerTodosLosEmpleados());
+        model.addAttribute("todasLasEtiquetas", etiquetaService.obtenerTodasLasEtiquetas());
+        return "admin/etiquetas/etiquetado_masivo";
+    }
+
+    @PostMapping("/masivo")
+    public String procesarEtiquetadoMasivo(@RequestParam List<UUID> empleadosIds,
+                                           @RequestParam(name = "etiquetasAsignadasIds", required = false) Set<UUID> etiquetasAsignadasIds,
+                                           RedirectAttributes redirectAttributes) {
+        try {
+            if (empleadosIds == null || empleadosIds.isEmpty()) {
+                redirectAttributes.addFlashAttribute("mensajeError", "Debe seleccionar al menos un empleado.");
+                return "redirect:/admin/etiquetas/masivo";
+            }
+
+            Set<UUID> etiquetasParaAsignar = (etiquetasAsignadasIds == null) ? new HashSet<>() : etiquetasAsignadasIds;
+
+            for (UUID empleadoId : empleadosIds) {
+                etiquetaService.asignarEtiquetasAEmpleado(empleadoId, etiquetasParaAsignar);
+            }
+            redirectAttributes.addFlashAttribute("mensajeExito", "Etiquetas aplicadas masivamente a los empleados seleccionados.");
+        } catch (EntityNotFoundException e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al procesar el etiquetado masivo: " + e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Ocurrió un error inesperado durante el etiquetado masivo.");
+            // Loggear el error e.printStackTrace(); o usar un logger de SLF4J
+            System.err.println("Error en procesarEtiquetadoMasivo: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return "redirect:/admin/etiquetas/masivo";
     }
 
     // --- API para búsqueda de etiquetas (autocompletado) ---
