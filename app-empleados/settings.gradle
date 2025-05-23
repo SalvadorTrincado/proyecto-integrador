@@ -1,3 +1,0 @@
-rootProject.name = 'empleados'
-
-include 'app-admin', 'app-empleados', 'common'

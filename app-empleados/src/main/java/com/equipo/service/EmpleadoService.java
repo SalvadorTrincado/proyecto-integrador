@@ -27,22 +27,6 @@ public class EmpleadoService {
         return empleadoRepository.save(empleado);
     }
 
-    public List<Empleado> buscarEmpleados(String searchText) {
-        if (searchText == null || searchText.trim().isEmpty()) {
-            return empleadoRepository.findAll(); // Si no hay texto de búsqueda, devuelve todos
-        }
-        return empleadoRepository.findByNombreOrApellidosContainingIgnoreCase(searchText);
-    }
-
-    public List<Empleado> buscarEmpleadosPorCriterios(String nombre, String apellidos, String departamento) {
-        // Normaliza las cadenas vacías a null para que la consulta JPQL funcione correctamente
-        String nombreParam = (nombre != null && !nombre.trim().isEmpty()) ? nombre.trim() : null;
-        String apellidosParam = (apellidos != null && !apellidos.trim().isEmpty()) ? apellidos.trim() : null;
-        String departamentoParam = (departamento != null && !departamento.trim().isEmpty()) ? departamento.trim() : null;
-
-        return empleadoRepository.buscarEmpleadosPorCriterios(nombreParam, apellidosParam, departamentoParam);
-    }
-
     public List<Empleado> buscarYOrdenar(String filtro, String ordenarPor) {
         List<Empleado> empleados = empleadoRepository.buscarEmpleadosPorNombreConteniendo(filtro);
 

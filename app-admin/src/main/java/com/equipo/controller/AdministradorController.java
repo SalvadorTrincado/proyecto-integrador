@@ -71,16 +71,4 @@ public class AdministradorController {
         return "redirect:/login/administrador"; // Redirige a la página de login
     }
 
-    @GetMapping("/admin/buscar-empleados")
-    public String mostrarBusquedaEmpleados(HttpSession sesion, Model modelo) {
-        Object adminId = sesion.getAttribute("adminId");
-        if (adminId != null) {
-            // Opcional: cargar todos los empleados al inicio o dejar que AJAX los cargue
-            // modelo.addAttribute("empleados", empleadoServicio.obtenerTodosLosEmpleados());
-            return "buscar_empleados"; // Una nueva vista dedicada a la búsqueda
-        } else {
-            return "redirect:/login/administrador";
-        }
-    }
-
 }

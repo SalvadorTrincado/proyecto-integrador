@@ -32,19 +32,4 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, UUID> {
     List<Empleado> findByDepartamento(String departamento);
 
     List<Empleado> findByEspecialidadesSeleccionadasContaining(String especialidad);
-
-    @Query("SELECT e FROM Empleado e WHERE LOWER(e.nombre) LIKE LOWER(CONCAT('%', :searchText, '%')) OR LOWER(e.apellidos) LIKE LOWER(CONCAT('%', :searchText, '%'))")
-    List<Empleado> findByNombreOrApellidosContainingIgnoreCase(@Param("searchText") String searchText);
-
-    @Query("SELECT e FROM Empleado e WHERE " +
-            "(:nombre IS NULL OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))) AND " +
-            "(:apellidos IS NULL OR LOWER(e.apellidos) LIKE LOWER(CONCAT('%', :apellidos, '%'))) AND " +
-            "(:departamento IS NULL OR LOWER(e.departamento) LIKE LOWER(CONCAT('%', :departamento, '%')))")
-    List<Empleado> buscarEmpleadosPorCriterios(
-            @Param("nombre") String nombre,
-            @Param("apellidos") String apellidos,
-            @Param("departamento") String departamento
-    );
-
-    List<Empleado> findByDepartamentoContainingIgnoreCase(String departamento);
 }
