@@ -2,155 +2,203 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consulta de Empleados</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <title>Consulta Dinámica de Empleados</title>
   <style>
-    body { padding-top: 20px; }
-    .container { max-width: 900px; }
-    form { margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-    label { display: block; margin-bottom: 8px; }
-    input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    button:hover { background-color: #0056b3; }
-    a.btn-secondary { display: inline-block; padding: 8px 12px; margin-top: 10px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
-    a.btn-secondary:hover { background-color: #5a6268; }
-    #resultadosEmpleadosContainer { margin-top: 30px; }
-    .table-responsive { margin-top: 20px; }
-    .alert { margin-top: 20px; }
+    body { font-family: Arial, sans-serif; margin: 20px; padding: 0; background-color: #f9f9f9; color: #333; }
+    .container { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; }
+    h2 { color: #0056b3; margin-top: 30px; }
+    .filter-form div { margin-bottom: 15px; display: flex; align-items: center; }
+    .filter-form label { display: inline-block; width: 140px; font-weight: bold; margin-right: 10px; }
+    .filter-form input[type="text"],
+    .filter-form input[type="number"] {
+      flex-grow: 1;
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .filter-form button {
+      padding: 10px 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-right: 8px;
+      transition: background-color 0.2s ease;
+    }
+    .filter-form button:hover { background-color: #0056b3; }
+    .filter-form button.secondary { background-color: #6c757d; }
+    .filter-form button.secondary:hover { background-color: #545b62; }
+    #empleadosTable { width: 100%; border-collapse: collapse; margin-top: 25px; }
+    #empleadosTable th, #empleadosTable td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    #empleadosTable th { background-color: #007bff; color: white; text-transform: uppercase; font-size: 0.9em;}
+    #empleadosTable tr:nth-child(even) { background-color: #f2f2f2; }
+    #empleadosTable tr:hover { background-color: #e9ecef; }
+    #loadingMessage { display: none; margin-top: 15px; color: #007bff; font-style: italic; }
+    .error-container { color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-top: 15px; }
+    .no-results { text-align: center; padding: 20px; color: #777; font-style: italic; }
+    .back-link { margin-top: 25px; display: inline-block; padding: 10px 15px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+    .back-link:hover { background-color: #5a6268; }
+    .action-link { padding: 5px 10px; background-color: #17a2b8; color: white; text-decoration: none; border-radius: 3px; font-size: 0.9em; }
+    .action-link:hover { background-color: #117a8b; }
   </style>
 </head>
 <body>
 <div class="container">
-  <h2>Consulta de Empleados</h2>
-  <form id="consultaEmpleadosForm">
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="nombre">Nombre:</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del empleado"/>
-      </div>
-      <div class="form-group col-md-6">
-        <label for="departamento">Departamento:</label>
-        <input type="text" class="form-control" id="departamento" name="departamento" placeholder="Departamento"/>
-      </div>
+  <h1>Consulta Parametrizada de Empleados</h1>
+
+  <form id="filtroFormEmpleados" class="filter-form">
+    <div>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" />
     </div>
-    <div class="form-row">
-      <div class="form-group col-md-6">
-        <label for="salarioMinimo">Salario mínimo (€):</label>
-        <input type="number" class="form-control" id="salarioMinimo" name="salarioMinimo" step="0.01" placeholder="Ej: 1200.50"/>
-      </div>
-      <div class="form-group col-md-6">
-        <label for="salarioMaximo">Salario máximo (€):</label>
-        <input type="number" class="form-control" id="salarioMaximo" name="salarioMaximo" step="0.01" placeholder="Ej: 2500.00"/>
-      </div>
+    <div>
+      <label for="departamento">Departamento:</label>
+      <input type="text" id="departamento" name="departamento" />
     </div>
-    <button type="submit" class="btn btn-primary">Buscar</button>
+    <div>
+      <label for="salarioMinimo">Salario Mínimo:</label>
+      <input type="number" step="0.01" id="salarioMinimo" name="salarioMinimo" />
+    </div>
+    <div>
+      <label for="salarioMaximo">Salario Máximo:</label>
+      <input type="number" step="0.01" id="salarioMaximo" name="salarioMaximo" />
+    </div>
+    <div>
+      <button type="submit">Buscar Empleados</button>
+      <button type="button" id="limpiarFiltrosEmpleados" class="secondary">Limpiar Filtros</button>
+    </div>
   </form>
 
-  <div id="resultadosEmpleadosContainer">
-  </div>
+  <div id="loadingMessage">Cargando empleados...</div>
+  <div id="errorContainer" class="error-container" style="display: none;"></div>
 
-  <a th:href="@{/admin/area_personal}" class="btn btn-secondary mt-3">Volver al Área Personal</a>
+  <h2>Listado de Empleados</h2>
+  <table id="empleadosTable">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Apellidos</th>
+      <th>Departamento</th>
+      <th>Salario Base Mensual</th>
+      <th>Fecha de Incorporación</th>
+      <th>Teléfono Móvil</th>
+      <th>Documento</th>
+      <th>Acciones</th> {/* Nueva columna */}
+    </tr>
+    </thead>
+    <tbody>
+    {/* Las filas se llenarán con JavaScript */}
+    </tbody>
+  </table>
+
+  <a th:href="@{/admin/area_personal}" class="back-link">Volver al Área Personal</a>
 </div>
 
-<script>
-  // Función para realizar la búsqueda y mostrar resultados
-  function buscarYMostrarEmpleados(queryParams) {
-    fetch(`/api/admin/empleados?${queryParams.toString()}`)
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Error en la red: ' + response.statusText);
-              }
-              return response.json();
-            })
-            .then(data => {
-              const resultadosContainer = document.getElementById('resultadosEmpleadosContainer');
-              resultadosContainer.innerHTML = ''; // Limpiar resultados anteriores
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function () {
+    const filtroForm = document.getElementById('filtroFormEmpleados');
+    const limpiarButton = document.getElementById('limpiarFiltrosEmpleados');
+    const tableBody = document.querySelector('#empleadosTable tbody');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const errorContainer = document.getElementById('errorContainer');
 
-              const nombre = queryParams.get('nombre');
-              const departamento = queryParams.get('departamento');
-              const salarioMinimo = queryParams.get('salarioMinimo');
-              const salarioMaximo = queryParams.get('salarioMaximo');
+    async function cargarEmpleados(params = {}) {
+      loadingMessage.style.display = 'block';
+      errorContainer.style.display = 'none';
+      errorContainer.textContent = '';
+      tableBody.innerHTML = '';
 
-              const criterios = [];
-              if (nombre) criterios.push(`Nombre: '${nombre}'`);
-              if (departamento) criterios.push(`Departamento: '${departamento}'`);
-              if (salarioMinimo) criterios.push(`Salario Mínimo: ${salarioMinimo}€`);
-              if (salarioMaximo) criterios.push(`Salario Máximo: ${salarioMaximo}€`);
+      const queryParams = new URLSearchParams();
+      if (params.nombre && params.nombre.trim() !== '') queryParams.append('nombre', params.nombre);
+      if (params.departamento && params.departamento.trim() !== '') queryParams.append('departamento', params.departamento);
+      if (params.salarioMinimo && params.salarioMinimo.trim() !== '') queryParams.append('salarioMinimo', params.salarioMinimo);
+      if (params.salarioMaximo && params.salarioMaximo.trim() !== '') queryParams.append('salarioMaximo', params.salarioMaximo);
 
-              let tituloResultados = "";
-              if (criterios.length > 0) {
-                tituloResultados = `<h3>Resultados para: ${criterios.join(', ')}</h3>`;
-              } else {
-                // Si no hay queryParams, significa que es la carga inicial o una búsqueda sin filtros
-                tituloResultados = `<h3>Mostrando todos los empleados</h3>`;
-              }
-              resultadosContainer.innerHTML += tituloResultados;
+      try {
+        const apiUrl = /*[[@{/api/admin/empleados/consultar}]]*/ '/api/admin/empleados/consultar';
+        const response = await fetch(`${apiUrl}?${queryParams.toString()}`);
 
-              if (data && data.length > 0) {
-                let tableHtml = `<div class="table-responsive">
-                             <table class="table table-striped table-bordered">
-                               <thead class="thead-dark">
-                                 <tr>
-                                   <th>ID</th>
-                                   <th>Nombre</th>
-                                   <th>Apellidos</th>
-                                   <th>Departamento</th>
-                                   <th>Salario Base (€)</th>
-                                   <th>Fecha Incorporación</th>
-                                   <th>Email</th>
-                                   <th>Edad</th>
-                                   <th>País Nacimiento</th>
-                                 </tr>
-                               </thead>
-                               <tbody>`;
-                data.forEach(empleado => {
-                  tableHtml += `<tr>
-                            <td>${empleado.id || 'N/A'}</td>
-                            <td>${empleado.nombre || 'N/A'}</td>
-                            <td>${empleado.apellidos || 'N/A'}</td>
-                            <td>${empleado.departamento || 'N/A'}</td>
-                            <td>${empleado.salarioBaseMensual ? Number(empleado.salarioBaseMensual).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) : 'N/A'}</td>
-                            <td>${empleado.fechaIncorporacion ? new Date(empleado.fechaIncorporacion).toLocaleDateString('es-ES') : 'N/A'}</td>
-                            <td>${empleado.email || 'N/A'}</td>
-                            <td>${empleado.edad || 'N/A'}</td>
-                            <td>${empleado.paisNacimiento || 'N/A'}</td>
-                          </tr>`;
-                });
-                tableHtml += `</tbody></table></div>`;
-                resultadosContainer.innerHTML += tableHtml;
-              } else {
-                resultadosContainer.innerHTML += '<div class="alert alert-info mt-3" role="alert">No se encontraron empleados con los criterios de búsqueda especificados.</div>';
-              }
-            })
-            .catch(error => {
-              const resultadosContainer = document.getElementById('resultadosEmpleadosContainer');
-              resultadosContainer.innerHTML = '<div class="alert alert-danger mt-3" role="alert">Error al realizar la búsqueda: ' + error.message + '</div>';
-              console.error('Error en la búsqueda:', error);
-            });
-  }
+        if (!response.ok) {
+          let errorMsg = `Error HTTP: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            errorMsg = errorData.message || errorData.error || JSON.stringify(errorData);
+          } catch (e) {
+            errorMsg = await response.text() || errorMsg;
+          }
+          throw new Error(errorMsg);
+        }
 
-  // Event listener para el envío del formulario
-  document.getElementById('consultaEmpleadosForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evitar el envío tradicional del formulario
+        const empleados = await response.json();
+        renderizarTabla(empleados);
 
-    const nombre = document.getElementById('nombre').value;
-    const departamento = document.getElementById('departamento').value;
-    const salarioMinimo = document.getElementById('salarioMinimo').value;
-    const salarioMaximo = document.getElementById('salarioMaximo').value;
+      } catch (error) {
+        console.error('Error al cargar empleados:', error);
+        errorContainer.textContent = 'Error al cargar empleados: ' + error.message;
+        errorContainer.style.display = 'block';
+        tableBody.innerHTML = '<tr><td colspan="9" class="no-results">No se pudieron cargar los datos.</td></tr>'; // Ajustar colspan
+      } finally {
+        loadingMessage.style.display = 'none';
+      }
+    }
 
-    let queryParams = new URLSearchParams();
-    if (nombre) queryParams.append('nombre', nombre);
-    if (departamento) queryParams.append('departamento', departamento);
-    if (salarioMinimo) queryParams.append('salarioMinimo', salarioMinimo);
-    if (salarioMaximo) queryParams.append('salarioMaximo', salarioMaximo);
+    function renderizarTabla(empleados) {
+      tableBody.innerHTML = '';
 
-    buscarYMostrarEmpleados(queryParams);
-  });
+      if (!empleados || empleados.length === 0) {
+        const row = tableBody.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 9; // Ajustar colspan
+        cell.textContent = 'No se encontraron empleados con los criterios seleccionados.';
+        cell.classList.add('no-results');
+        return;
+      }
 
-  // Cargar todos los empleados cuando el DOM esté listo
-  document.addEventListener('DOMContentLoaded', function() {
-    buscarYMostrarEmpleados(new URLSearchParams()); // Pasa URLSearchParams vacío para obtener todos
+      empleados.forEach(empleado => {
+        const row = tableBody.insertRow();
+        row.insertCell().textContent = empleado.id || '';
+        row.insertCell().textContent = empleado.nombre || '';
+        row.insertCell().textContent = empleado.apellidos || '';
+        row.insertCell().textContent = empleado.departamento || '';
+        row.insertCell().textContent = empleado.salarioBaseMensual != null ? `${parseFloat(empleado.salarioBaseMensual).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}` : '';
+        row.insertCell().textContent = empleado.fechaIncorporacion ? new Date(empleado.fechaIncorporacion).toLocaleDateString('es-ES') : '';
+        row.insertCell().textContent = empleado.telefonoMovil || '';
+        row.insertCell().textContent = empleado.documento || '';
+
+        // Celda de Acciones
+        const accionesCell = row.insertCell();
+        const detalleLink = document.createElement('a');
+        const detalleUrl = /*[[@{/admin/detalle/}]]*/ '/admin/detalle/';
+        detalleLink.href = detalleUrl + empleado.id;
+        detalleLink.textContent = 'Detalles';
+        detalleLink.classList.add('action-link');
+        accionesCell.appendChild(detalleLink);
+      });
+    }
+
+    filtroForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const formData = new FormData(filtroForm);
+      const params = {
+        nombre: formData.get('nombre'),
+        departamento: formData.get('departamento'),
+        salarioMinimo: formData.get('salarioMinimo'),
+        salarioMaximo: formData.get('salarioMaximo'),
+      };
+      cargarEmpleados(params);
+    });
+
+    limpiarButton.addEventListener('click', function () {
+      filtroForm.reset();
+      cargarEmpleados();
+    });
+
+    cargarEmpleados();
   });
 </script>
 </body>

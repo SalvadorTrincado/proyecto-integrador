@@ -2,6 +2,8 @@ package com.equipo.service;
 
 import com.equipo.entity.Empleado;
 import com.equipo.repository.EmpleadoRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,7 @@ import java.util.UUID;
 @Service
 public class EmpleadoService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EmpleadoService.class);
     private final EmpleadoRepository empleadoRepository;
 
     @Autowired
@@ -24,7 +27,10 @@ public class EmpleadoService {
     @Transactional
     public Empleado guardarEmpleado(Empleado empleado) {
         // Aquí podrías añadir lógica de negocio o validaciones antes de guardar
-        return empleadoRepository.save(empleado);
+        logger.info("Intentando guardar empleado: {}", empleado);
+        Empleado empleadoGuardado = empleadoRepository.save(empleado);
+        logger.info("Empleado guardado con ID: {}", empleadoGuardado.getId());
+        return empleadoGuardado;
     }
 
     public List<Empleado> buscarYOrdenar(String filtro, String ordenarPor) {
@@ -49,6 +55,11 @@ public class EmpleadoService {
     @Transactional(readOnly = true)
     public Optional<Empleado> obtenerEmpleadoPorId(UUID id) {
         return empleadoRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Empleado> buscarEmpleadosPorParametros(String nombre, String departamento, Double salarioMinimo, Double salarioMaximo) {
+        return empleadoRepository.buscarPorParametros(nombre, departamento, salarioMinimo, salarioMaximo);
     }
 
     @Transactional(readOnly = true)

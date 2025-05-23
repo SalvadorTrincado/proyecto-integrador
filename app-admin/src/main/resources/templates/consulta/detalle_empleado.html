@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle del Empleado</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; padding: 0; background-color: #f9f9f9; color: #333; }
+    .container { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
+    h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; }
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .detail-item { background-color: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #e9ecef; }
+    .detail-item strong { display: block; color: #495057; margin-bottom: 5px; font-size: 0.9em; }
+    .detail-item span, .detail-item ul { font-size: 1em; color: #212529; }
+    .detail-item ul { list-style-type: none; padding-left: 0; margin-top: 5px; }
+    .detail-item ul li { background-color: #e9ecef; margin-bottom: 3px; padding: 3px 6px; border-radius: 3px;}
+    .back-link { margin-top: 25px; display: inline-block; padding: 10px 15px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+    .back-link:hover { background-color: #5a6268; }
+    .error-message { color: #dc3545; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-top: 15px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Detalle del Empleado</h1>
+
+  <div th:if="${empleado != null}">
+    <div class="detail-grid">
+      <div class="detail-item"><strong>ID:</strong> <span th:text="${empleado.id}"></span></div>
+    </div>
+
+    <h2>Datos Personales</h2>
+    <div class="detail-grid">
+      <div class="detail-item"><strong>Nombre:</strong> <span th:text="${empleado.nombre}"></span></div>
+      <div class="detail-item"><strong>Apellidos:</strong> <span th:text="${empleado.apellidos}"></span></div>
+      <div class="detail-item"><strong>Fotografía:</strong> <span th:text="${empleado.fotografia ?: 'N/A'}"></span></div>
+      <div class="detail-item"><strong>Género:</strong> <span th:text="${empleado.generoSeleccionado}"></span></div>
+      <div class="detail-item"><strong>Fecha de Nacimiento:</strong> <span th:text="${#temporals.format(empleado.fechaNacimiento, 'dd/MM/yyyy')}"></span></div>
+      <div class="detail-item"><strong>Edad:</strong> <span th:text="${empleado.edad}"></span></div>
+      <div class="detail-item"><strong>País de Nacimiento:</strong> <span th:text="${empleado.paisNacimiento}"></span></div>
+      <div class="detail-item"><strong>Comentarios:</strong> <span th:text="${empleado.comentarios ?: 'N/A'}"></span></div>
+    </div>
+
+    <h2>Datos de Contacto</h2>
+    <div class="detail-grid">
+      <div class="detail-item"><strong>Tipo Documento:</strong> <span th:text="${empleado.tipoDocumento}"></span></div>
+      <div class="detail-item"><strong>Documento:</strong> <span th:text="${empleado.documento}"></span></div>
+      <div class="detail-item"><strong>Teléfono:</strong> <span th:text="${empleado.prefijoTelefono + ' ' + empleado.telefonoMovil}"></span></div>
+      <div class="detail-item"><strong>Dirección Principal:</strong>
+        <span th:text="${empleado.tipoViaDireccionPpal + ' ' + empleado.nombreViaDireccionPpal + ', Nº ' + empleado.numeroViaDireccionPpal}"></span><br/>
+        <span th:if="${empleado.portalDireccionPpal}" th:text="'Portal: ' + ${empleado.portalDireccionPpal} + ', '"></span>
+        <span th:if="${empleado.plantaDireccionPpal}" th:text="'Planta: ' + ${empleado.plantaDireccionPpal} + ', '"></span>
+        <span th:if="${empleado.puertaDireccionPpal}" th:text="'Puerta: ' + ${empleado.puertaDireccionPpal}"></span><br/>
+        <span th:text="${empleado.localidadDireccionPpal + ', ' + empleado.regionDireccionPpal + ', ' + empleado.codigoPostalDireccionPpal}"></span>
+      </div>
+    </div>
+
+    <h2>Datos Profesionales</h2>
+    <div class="detail-grid">
+      <div class="detail-item"><strong>Departamento:</strong> <span th:text="${empleado.departamento}"></span></div>
+      <div class="detail-item"><strong>Especialidades:</strong>
+        <ul th:if="${empleado.especialidadesSeleccionadas != null and !empleado.especialidadesSeleccionadas.isEmpty()}">
+          <li th:each="especialidad : ${empleado.especialidadesSeleccionadas}" th:text="${especialidad}"></li>
+        </ul>
+        <span th:if="${empleado.especialidadesSeleccionadas == null or empleado.especialidadesSeleccionadas.isEmpty()}">N/A</span>
+      </div>
+    </div>
+
+    <h2>Datos Económicos</h2>
+    <div class="detail-grid">
+      <div class="detail-item"><strong>Número de Cuenta:</strong> <span th:text="${empleado.numeroCuenta}"></span></div>
+      <div class="detail-item"><strong>Tipo de Contrato:</strong> <span th:text="${empleado.tipoContrato}"></span></div>
+      <div class="detail-item"><strong>Categoría Profesional:</strong> <span th:text="${empleado.categoriaProfesional}"></span></div>
+      <div class="detail-item"><strong>Salario Base Mensual:</strong> <span th:text="${#numbers.formatDecimal(empleado.salarioBaseMensual, 1, 'POINT', 2, 'COMMA') + ' €'}"></span></div>
+      <div class="detail-item"><strong>Complemento Mensual:</strong> <span th:text="${empleado.complementoMensual != null ? #numbers.formatDecimal(empleado.complementoMensual, 1, 'POINT', 2, 'COMMA') + ' €' : 'N/A'}"></span></div>
+      <div class="detail-item"><strong>Devengo Paga Extra:</strong> <span th:text="${empleado.devengoPagaExtra}"></span></div>
+      <div class="detail-item"><strong>Fecha de Incorporación:</strong> <span th:text="${#temporals.format(empleado.fechaIncorporacion, 'dd/MM/yyyy')}"></span></div>
+    </div>
+
+  </div>
+  <div th:if="${empleado == null}" class="error-message">
+    No se pudo encontrar el empleado.
+  </div>
+
+  <a th:href="@{/admin/consulta-empleados}" class="back-link">Volver a la Consulta</a>
+</div>
+</body>
+</html>

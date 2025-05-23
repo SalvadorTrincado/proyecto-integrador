@@ -33,7 +33,7 @@ public class WebSecurityConfig {
                                 "/js/**"   // Allow access to JS if you have any global ones
                         ).permitAll()
                         // Explicitly permit GET requests to employee details and consultation
-                        .requestMatchers(HttpMethod.GET, "/admin/consulta-empleados", "/admin/empleados/detalle/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/admin/consulta", "/admin/empleados/detalle/**").permitAll()
                         // Permit other /admin paths as needed or fall through
                         .requestMatchers("/admin/**").permitAll() // Or be more specific if required
                         .anyRequest().permitAll() // Fallback to permit all other requests

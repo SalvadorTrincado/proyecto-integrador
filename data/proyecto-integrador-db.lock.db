@@ -1,6 +1,6 @@
 #FileLock
-#Fri May 23 13:17:18 CEST 2025
-server=10.227.189.203\:53197
-hostName=Salvador
+#Fri May 23 14:49:00 CEST 2025
+server=172.74.217.21\:63942
+hostName=Andriy
 method=file
-id=196fcdc9c2d74cd1190bb58c9bdf33d2a78aa823c0c
+id=196fd309119ac199e9ced90081ffdfeeac949085b27
