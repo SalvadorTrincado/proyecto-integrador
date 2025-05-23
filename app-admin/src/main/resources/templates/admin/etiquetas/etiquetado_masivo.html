@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Etiquetado Masivo de Empleados</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/lista_nominas.css}"> <style>
+  .container {
+    max-width: 1000px; /* Más ancho para el trasvase */
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  h1 {
+    color: #0056b3;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  .form-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+  }
+  .select-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Alinear los selects y botones */
+    gap: 15px; /* Espacio entre los elementos */
+  }
+  .select-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .select-column label {
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  .select-column select[multiple] {
+    width: 100%;
+    min-height: 200px; /* Altura mínima para los selects */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  .transfer-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center; /* Centrar los botones verticalmente */
+    gap: 10px; /* Espacio entre botones */
+    padding: 0 10px;
+  }
+  .transfer-buttons button {
+    padding: 8px 12px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .transfer-buttons button:hover {
+    background-color: #545b62;
+  }
+  .submit-section {
+    margin-top: 20px;
+    text-align: right;
+  }
+  .btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+  }
+  .btn-primary { background-color: #007bff; color: white; }
+  .btn-primary:hover { background-color: #0056b3; }
+  .btn-secondary { background-color: #6c757d; color: white; }
+  .btn-secondary:hover { background-color: #545b62; }
+
+  .alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+  }
+  .alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+  }
+  .alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Etiquetado Masivo de Empleados</h1>
+
+  <div th:if="${mensajeExito}" class="alert alert-success" th:text="${mensajeExito}"></div>
+  <div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
+
+  <form th:action="@{/admin/etiquetas/masivo}" method="post" id="formEtiquetadoMasivo">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+    <div class="form-section">
+      <h2>Seleccionar Empleados</h2>
+      <div class="select-column">
+        <label for="empleadosIds">Empleados (selección múltiple):</label>
+        <select id="empleadosIds" name="empleadosIds" multiple="multiple" required>
+          <option th:each="emp : ${todosLosEmpleados}"
+                  th:value="${emp.id}"
+                  th:text="${emp.nombre + ' ' + emp.apellidos}"></option>
+        </select>
+        <small>Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples empleados.</small>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Asignar Etiquetas</h2>
+      <div class="select-container">
+        <div class="select-column">
+          <label for="etiquetasDisponibles">Etiquetas Disponibles:</label>
+          <select id="etiquetasDisponibles" multiple="multiple">
+            <option th:each="et : ${todasLasEtiquetas}"
+                    th:value="${et.id}"
+                    th:text="${et.nombre}"></option>
+          </select>
+        </div>
+
+        <div class="transfer-buttons">
+          <button type="button" onclick="transferir('etiquetasDisponibles', 'etiquetasAsignadasIds')">&gt;&gt;</button>
+          <button type="button" onclick="transferir('etiquetasAsignadasIds', 'etiquetasDisponibles')">&lt;&lt;</button>
+        </div>
+
+        <div class="select-column">
+          <label for="etiquetasAsignadasIds">Etiquetas a Asignar:</label>
+          <select id="etiquetasAsignadasIds" name="etiquetasAsignadasIds" multiple="multiple">
+          </select>
+        </div>
+      </div>
+      <small>Las etiquetas en "Etiquetas a Asignar" reemplazarán las etiquetas existentes de los empleados seleccionados.</small>
+    </div>
+
+    <div class="submit-section">
+      <button type="submit" class="btn btn-primary">Aplicar Etiquetas a Empleados Seleccionados</button>
+    </div>
+  </form>
+
+  <div style="margin-top: 20px;">
+    <a th:href="@{/admin/etiquetas}" class="btn btn-secondary">Volver a Gestión de Etiquetas</a>
+    <a th:href="@{/admin/area_personal}" class="btn btn-secondary" style="margin-left: 10px;">Volver al Área Personal</a>
+  </div>
+</div>
+
+<script>
+  function transferir(origenId, destinoId) {
+    const origenSelect = document.getElementById(origenId);
+    const destinoSelect = document.getElementById(destinoId);
+
+    Array.from(origenSelect.selectedOptions).forEach(option => {
+      destinoSelect.appendChild(option); // Mueve la opción
+    });
+  }
+
+  // Asegurarse de que todas las opciones en el select 'etiquetasAsignadasIds' estén seleccionadas antes de enviar
+  document.getElementById('formEtiquetadoMasivo').addEventListener('submit', function() {
+    const etiquetasAsignadasSelect = document.getElementById('etiquetasAsignadasIds');
+    Array.from(etiquetasAsignadasSelect.options).forEach(option => {
+      option.selected = true;
+    });
+  });
+</script>
+
+</body>
+</html>

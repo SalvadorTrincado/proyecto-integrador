@@ -36,6 +36,31 @@
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
         }
+        .etiquetas-list {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .etiquetas-list h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #3a5a40;
+        }
+        .etiquetas-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .etiquetas-list li {
+            display: inline-block;
+            background-color: #a3b18a;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -56,11 +81,22 @@
 
 <div th:if="${esEmpleado == true}" class="employee-actions">
     <p>¡Tu perfil de empleado está completo!</p>
+
+    <div th:if="${etiquetasDelEmpleado != null && !etiquetasDelEmpleado.isEmpty()}" class="etiquetas-list">
+        <h3>Mis Etiquetas:</h3>
+        <ul>
+            <li th:each="nombreEtiqueta : ${etiquetasDelEmpleado}" th:text="${nombreEtiqueta}"></li>
+        </ul>
+    </div>
+    <div th:if="${etiquetasDelEmpleado == null || etiquetasDelEmpleado.isEmpty()}" class="etiquetas-list">
+        <p>No tienes etiquetas asignadas.</p>
+    </div>
     <a th:href="@{/empleado/nominas/consultar}">Consultar Mis Nóminas</a>
 </div>
 
 <form th:action="@{/logout}" method="post" style="margin-top: 20px;">
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/> <button type="submit">Desconectar</button>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+    <button type="submit">Desconectar</button>
 </form>
 </body>
 </html>
