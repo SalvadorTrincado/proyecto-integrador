@@ -1,18 +1,67 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área Personal</title>
-    <link rel="stylesheet" href="/css/area_personal.css"> </head>
+    <link rel="stylesheet" th:href="@{/css/area_personal.css}">
+    <style>
+        .registration-prompt a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #3a5a40;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .registration-prompt a:hover {
+            background-color: #588157;
+        }
+        .message-global {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success-message-global {
+            color: #155724; /* Color de texto verde oscuro */
+            background-color: #d4edda; /* Fondo verde claro */
+            border: 1px solid #c3e6cb; /* Borde verde más claro */
+        }
+        .error-message-global {
+            color: #721c24; /* Color de texto rojo oscuro */
+            background-color: #f8d7da; /* Fondo rojo claro */
+            border: 1px solid #f5c6cb; /* Borde rojo más claro */
+        }
+    </style>
+</head>
 <body>
-    <h1>Bienvenido a tu Área Personal</h1>
+<div th:if="${mensajeExitoGlobal}" class="message-global success-message-global" th:text="${mensajeExitoGlobal}"></div>
+<div th:if="${errorGlobal}" class="message-global error-message-global" th:text="${errorGlobal}"></div>
 
-    <p th:if="${usuarioId != null}">Tu ID de usuario es: <span th:text="${usuarioId}"></span></p>
-    <p th:unless="${usuarioId != null}">Usuario no identificado.</p>
+<h1 th:if="${esEmpleado == true}">Bienvenido/a, <span th:text="${nombreCompletoEmpleado}"></span>!</h1>
+<h1 th:if="${esEmpleado == false}">Bienvenido a tu Área Personal</h1>
 
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Desconectar</button>
-    </form>
+<p th:if="${usuarioId != null}">Tu ID de usuario es: <span th:text="${usuarioId}"></span></p>
+<p>Email: <span sec:authentication="name"></span></p>
+
+
+<div th:if="${esEmpleado == false}" class="registration-prompt">
+    <p th:if="${mensajeOpcionRegistro}" th:text="${mensajeOpcionRegistro}"></p>
+    <p>Parece que aún no has completado tu perfil de empleado.</p>
+    <a th:href="@{/registro_empleado_paso1}">Completar Registro de Empleado</a>
+</div>
+
+<div th:if="${esEmpleado == true}">
+    <p>¡Tu perfil de empleado está completo!</p>
+    <p><a href="#">Consultar Mis Nóminas</a> (Funcionalidad futura)</p>
+</div>
+
+<form th:action="@{/logout}" method="post" style="margin-top: 20px;">
+    <button type="submit">Desconectar</button>
+</form>
 </body>
 </html>

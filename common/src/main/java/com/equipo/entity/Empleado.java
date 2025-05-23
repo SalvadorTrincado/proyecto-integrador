@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList; // Importar por si se inicializa la lista aquí
 import java.util.List;
 import java.util.UUID;
 
@@ -13,28 +14,19 @@ import java.util.UUID;
 public class Empleado {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    // @GeneratedValue(strategy = GenerationType.AUTO) // <-- LÍNEA ELIMINADA/COMENTADA
     private UUID id;
 
     // PASO 1: Datos personales
     private String nombre;
     private String apellidos;
-    private String fotografia; // Guardaremos la ruta o el nombre del archivo
+    private String fotografia;
     private String generoSeleccionado;
     private LocalDate fechaNacimiento;
     private Integer edad;
     private String paisNacimiento;
     @Column(length = 500)
     private String comentarios;
-   // @ManyToMany
-    //@JoinTable(
-     //       name = "empleados_etiquetas",
-      //      joinColumns = @JoinColumn(name = "empleados_id"),
-      //      inverseJoinColumns = @JoinColumn(name = "etiquetas_id")
-   // )
-    //private Set<Etiqueta> etiquetas = new HashSet<>();
-
-
 
     // PASO 2: Datos de contacto
     private String tipoDocumento;
@@ -53,10 +45,10 @@ public class Empleado {
 
     // PASO 3: Datos profesionales
     private String departamento;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY) // fetch = FetchType.LAZY es el default, pero puede ser explícito
     @CollectionTable(name = "empleado_especialidades", joinColumns = @JoinColumn(name = "empleado_id"))
     @Column(name = "especialidad")
-    private List<String> especialidadesSeleccionadas;
+    private List<String> especialidadesSeleccionadas = new ArrayList<>(); // Inicializar aquí es buena práctica
 
     // PASO 4: Datos económicos
     private String numeroCuenta;
