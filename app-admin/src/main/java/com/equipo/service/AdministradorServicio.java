@@ -69,7 +69,7 @@ public class AdministradorServicio {
 
             for (Administrador admin : admins) {
                 if (admin.getEmail() != null && !administradorRepositorio.findByEmail(admin.getEmail()).isPresent()) {
-                    admin.setPassword(passwordEncoder.encode(admin.getPassword())); // 🔐 Encode before saving
+                    admin.setPassword(passwordEncoder.encode(admin.getPassword()));
                     administradorRepositorio.save(admin);
                 }
             }

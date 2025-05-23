@@ -1,22 +1,21 @@
 package com.equipo.config;
 /*
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
 @Configuration
-@EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.equipo")
 public class DataSourceConfig {
 
     @Bean
-    @ConfigurationProperties("spring.datasource")
     public DataSource dataSource() {
-        return DataSourceBuilder.create().build();
+        return DataSourceBuilder.create()
+                .driverClassName("org.h2.Driver")
+                .url("jdbc:h2:file:~/proyecto-integrador-db;AUTO_SERVER=TRUE")
+                .username("sa")
+                .password("")
+                .build();
     }
 }*/
