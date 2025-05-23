@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta de Nóminas</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/lista_nominas.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Consulta de Nóminas</h1>
+
+    <div th:if="${param.error}" class="alert alert-danger"> <strong th:text="${param.error[0]}">Error</strong>
+    </div>
+    <div th:if="${error}" class="alert alert-danger"> <strong th:text="${error}"></strong>
+    </div>
+    <div th:if="${param.exito}" class="alert alert-success"> <strong th:text="${param.exito[0]}"></strong>
+    </div>
+    <div th:if="${exito}" class="alert alert-success"> <strong th:text="${exito}"></strong>
+    </div>
+
+
+    <form th:action="@{/admin/nominas/consultar}" method="get" class="filter-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="empleadoId">Empleado:</label>
+                <select id="empleadoId" name="empleadoId">
+                    <option value="">-- Todos los Empleados --</option>
+                    <option th:each="emp : ${empleados}"
+                            th:value="${emp.id}"
+                            th:text="${emp.nombre + ' ' + emp.apellidos}"
+                            th:selected="${empleadoIdSeleccionado != null && emp.id.toString() == empleadoIdSeleccionado}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fechaDesde">Desde Fecha Inicio Período:</label>
+                <input type="date" id="fechaDesde" name="fechaDesde" th:value="${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}">
+            </div>
+            <div class="form-group">
+                <label for="fechaHasta">Hasta Fecha Fin Período:</label>
+                <input type="date" id="fechaHasta" name="fechaHasta" th:value="${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''}">
+            </div>
+            <div class="form-group" style="align-self: flex-end;">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+                <a th:href="@{/admin/nominas/consultar}" class="btn btn-secondary">Limpiar Filtros</a>
+            </div>
+        </div>
+    </form>
+
+    <a th:href="@{/admin/nominas/crear}" class="btn btn-success" style="margin-bottom: 20px;">Crear Nueva Nómina</a>
+
+    <div th:if="${nominas != null && !nominas.isEmpty()}">
+        <table>
+            <thead>
+            <tr>
+                <th>ID Nómina (corto)</th>
+                <th>Empleado</th>
+                <th>Período</th>
+                <th style="text-align: right;">Neto a Percibir</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="nomina : ${nominas.content}">
+                <td th:text="${#strings.substring(nomina.id, 0, 8) + '...'}"></td>
+                <td th:text="${nomina.nombreCompletoEmpleado}"></td>
+                <td th:text="${#temporals.format(nomina.fechaInicioPeriodo, 'dd/MM/yy')} + ' - ' + ${#temporals.format(nomina.fechaFinPeriodo, 'dd/MM/yy')}"></td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(nomina.netoAPercibir, 1, 'COMMA', 2, 'POINT') + ' €'}"></td>
+                <td class="actions">
+                    <a th:href="@{/admin/nominas/detalle/{id}(id=${nomina.id})}" class="btn btn-info btn-sm">Detalle</a>
+                    <th:block th:with="hoy=${T(java.time.LocalDate).now()}, ultimoDiaMesAnterior=${hoy.withDayOfMonth(1).minusDays(1)}">
+                        <a th:if="${!nomina.fechaFinPeriodo.isBefore(ultimoDiaMesAnterior)}"
+                           th:href="@{/admin/nominas/modificar/{id}(id=${nomina.id})}"
+                           class="btn btn-primary btn-sm">Modificar</a>
+                        <button th:if="${!nomina.fechaFinPeriodo.isBefore(ultimoDiaMesAnterior)}"
+                                type="button" class="btn btn-danger btn-sm"
+                                th:attr="data-nomina-id=${nomina.id}, data-csrf-token=${_csrf.token}, data-csrf-header=${_csrf.headerName}"
+                                onclick="eliminarNominaConFetch(this.getAttribute('data-nomina-id'), this.getAttribute('data-csrf-token'), this.getAttribute('data-csrf-header'))">
+                            Eliminar
+                        </button>
+                    </th:block>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination" th:if="${nominas.totalPages > 0}">
+            <th:block th:if="${nominas.hasPrevious()}">
+                <a th:with="baseUrlAnterior=@{/admin/nominas/consultar(page=${nominas.number - 1}, size=${nominas.size}, empleadoId=${empleadoIdSeleccionado}, fechaDesde=${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}, fechaHasta=${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''})}"
+                   th:href="${baseUrlAnterior + pageableParams}">
+                    &laquo; Anterior
+                </a>
+            </th:block>
+            <span th:unless="${nominas.hasPrevious()}" class="disabled">&laquo; Anterior</span>
+
+            <th:block th:each="i : ${#numbers.sequence(0, nominas.totalPages - 1)}">
+                <th:block th:if="${i == nominas.number}">
+                    <span class="active" th:text="${i + 1}"></span>
+                </th:block>
+                <th:block th:unless="${i == nominas.number}">
+                    <a th:with="baseUrlPagina=@{/admin/nominas/consultar(page=${i}, size=${nominas.size}, empleadoId=${empleadoIdSeleccionado}, fechaDesde=${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}, fechaHasta=${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''})}"
+                       th:href="${baseUrlPagina + pageableParams}"
+                       th:text="${i + 1}">
+                    </a>
+                </th:block>
+            </th:block>
+
+            <th:block th:if="${nominas.hasNext()}">
+                <a th:with="baseUrlSiguiente=@{/admin/nominas/consultar(page=${nominas.number + 1}, size=${nominas.size}, empleadoId=${empleadoIdSeleccionado}, fechaDesde=${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}, fechaHasta=${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''})}"
+                   th:href="${baseUrlSiguiente + pageableParams}">
+                    Siguiente &raquo;
+                </a>
+            </th:block>
+            <span th:unless="${nominas.hasNext()}" class="disabled">Siguiente &raquo;</span>
+        </div>
+
+    </div>
+    <div th:if="${nominas == null || nominas.isEmpty()}" class="no-results">
+        <p>No se encontraron nóminas con los criterios seleccionados.</p>
+    </div>
+    <div style="margin-top: 20px;">
+        <a th:href="@{/admin/area_personal}" class="btn btn-secondary">Volver al Área Personal</a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    function eliminarNominaConFetch(nominaId, csrfToken, csrfHeaderName) {
+        if (confirm('¿Está seguro de que desea eliminar esta nómina? UUID: ' + nominaId)) {
+            const url = /*[[@{/api/admin/nominas/}]]*/ '/api/admin/nominas/' + nominaId;
+            console.log('Intentando eliminar en URL:', url);
+            console.log('CSRF Token:', csrfToken);
+            console.log('CSRF Header Name:', csrfHeaderName);
+
+            fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    [csrfHeaderName]: csrfToken
+                }
+            })
+                .then(response => {
+                    if (response.status === 200 || response.status === 204) { // Éxito o Sin Contenido
+                        // Intenta parsear como JSON si hay cuerpo, sino solo recarga
+                        return response.text().then(text => {
+                            try {
+                                return text ? JSON.parse(text) : { mensaje: 'Nómina eliminada correctamente (sin contenido en respuesta).' };
+                            } catch (e) {
+                                return { mensaje: 'Nómina eliminada correctamente (respuesta no JSON).' };
+                            }
+                        });
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.error || `Error del servidor: ${response.status} ${response.statusText}`);
+                        }).catch(() => {
+                            throw new Error(`Error del servidor: ${response.status} ${response.statusText}`);
+                        });
+                    }
+                })
+                .then(data => {
+                    alert(data.mensaje || 'Nómina eliminada.'); // Mensaje de éxito
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error en fetch al eliminar:', error);
+                    alert('Error al eliminar la nómina: ' + error.message);
+                });
+        }
+    }
+    /*]]>*/
+</script>
+
+</body>
+</html>

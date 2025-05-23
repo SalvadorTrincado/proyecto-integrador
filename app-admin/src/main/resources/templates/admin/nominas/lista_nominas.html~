@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="es" xmlns:th="http://www.thymeleaf.org">
+        <head>
+        <meta charset="UTF-8">
+        <title>Consulta de Nóminas</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/admin_tables.css}"> <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f6; color: #333; }
+    .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+    .filter-form { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #dee2e6;}
+    .form-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+    .form-group { flex: 1; min-width: 200px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input[type="date"],
+    .form-group select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; text-decoration: none; display: inline-block; margin-top: 5px; /* Para alinear con inputs */ }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-primary:hover { background-color: #0056b3; }
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn-secondary:hover { background-color: #5a6268; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn-success:hover { background-color: #1e7e34; }
+    .btn-info { background-color: #17a2b8; color: white; }
+    .btn-info:hover { background-color: #117a8b; }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .btn-danger:hover { background-color: #bd2130;}
+
+
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: middle;}
+    th { background-color: #e9ecef; }
+    .actions a, .actions button { margin-right: 5px; font-size: 0.9em; padding: 5px 8px; }
+    .actions form { margin-bottom: 0; } /* Para alinear el botón de eliminar */
+    .pagination { margin-top: 20px; text-align: center; }
+    .pagination a, .pagination span { margin: 0 5px; padding: 5px 10px; border: 1px solid #ddd; text-decoration: none; color: #007bff; border-radius: 4px;}
+    .pagination .active { background-color: #007bff; color: white; border-color: #007bff; }
+    .pagination .disabled { color: #ccc; pointer-events: none; border-color: #ddd; }
+    .no-results { text-align: center; padding: 20px; color: #777; font-style: italic; }
+    .alert { padding: 10px; border-radius: 5px; margin-bottom: 15px; border: 1px solid transparent; }
+    .alert-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;}
+    .alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb;}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Consulta de Nóminas</h1>
+
+    <div th:if="${error}" class="alert alert-danger">
+        <strong th:text="${error}"></strong>
+    </div>
+    <div th:if="${exito}" class="alert alert-success">
+        <strong th:text="${exito}"></strong>
+    </div>
+
+    <form th:action="@{/admin/nominas/consultar}" method="get" class="filter-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="empleadoId">Empleado:</label>
+                <select id="empleadoId" name="empleadoId">
+                    <option value="">-- Todos los Empleados --</option>
+                    <option th:each="emp : ${empleados}"
+                            th:value="${emp.id}"
+                            th:text="${emp.nombre + ' ' + emp.apellidos}"
+                            th:selected="${empleadoIdSeleccionado != null && emp.id.toString() == empleadoIdSeleccionado}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fechaDesde">Desde Fecha Inicio Periodo:</label>
+                <input type="date" id="fechaDesde" name="fechaDesde" th:value="${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}">
+            </div>
+            <div class="form-group">
+                <label for="fechaHasta">Hasta Fecha Fin Periodo:</label>
+                <input type="date" id="fechaHasta" name="fechaHasta" th:value="${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''}">
+            </div>
+            <div class="form-group" style="align-self: flex-end;">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+                <a th:href="@{/admin/nominas/consultar}" class="btn btn-secondary">Limpiar Filtros</a>
+            </div>
+        </div>
+    </form>
+
+    <a th:href="@{/admin/nominas/crear}" class="btn btn-success" style="margin-bottom: 20px;">Crear Nueva Nómina</a>
+
+    <div th:if="${nominas != null && !nominas.isEmpty()}"> <table>
+        <thead>
+        <tr>
+            <th>ID Nómina (corto)</th>
+            <th>Empleado</th>
+            <th>Periodo</th>
+            <th style="text-align: right;">Neto a Percibir</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="nomina : ${nominas.content}">
+            <td th:text="${#strings.substring(nomina.id, 0, 8) + '...'}"></td>
+            <td th:text="${nomina.nombreCompletoEmpleado}"></td>
+            <td th:text="${#temporals.format(nomina.fechaInicioPeriodo, 'dd/MM/yy')} + ' - ' + ${#temporals.format(nomina.fechaFinPeriodo, 'dd/MM/yy')}"></td>
+            <td style="text-align: right;" th:text="${#numbers.formatDecimal(nomina.netoAPercibir, 1, 'COMMA', 2, 'POINT') + ' €'}"></td>
+            <td class="actions">
+                <a th:href="@{/admin/nominas/detalle/{id}(id=${nomina.id})}" class="btn btn-info btn-sm">Detalle</a>
+                <th:block th:with="hoy=${T(java.time.LocalDate).now()}, ultimoDiaMesAnterior=${hoy.withDayOfMonth(1).minusDays(1)}">
+                    <a th:if="${!nomina.fechaFinPeriodo.isBefore(ultimoDiaMesAnterior)}"
+                       th:href="@{/admin/nominas/modificar/{id}(id=${nomina.id})}"
+                       class="btn btn-primary btn-sm">Modificar</a>
+                    <form th:if="${!nomina.fechaFinPeriodo.isBefore(ultimoDiaMesAnterior)}"
+                          th:action="@{/api/admin/nominas/{id}(id=${nomina.id})}"
+                          method="post" style="display: inline;" onsubmit="return confirm('¿Está seguro de que desea eliminar esta nómina?');">
+                        <input type="hidden" name="_method" value="delete" />
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+        <div class="pagination" th:if="${nominas.totalPages > 0}">
+            <th:block th:if="${nominas.hasPrevious()}">
+                <a th:with="baseUrlAnterior=@{/admin/nominas/consultar(page=${nominas.number - 1}, size=${nominas.size}, empleadoId=${empleadoIdSeleccionado}, fechaDesde=${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}, fechaHasta=${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''})}"
+                   th:href="${baseUrlAnterior + pageableParams}">
+                    &laquo; Anterior
+                </a>
+            </th:block>
+            <span th:unless="${nominas.hasPrevious()}" class="disabled">&laquo; Anterior</span>
+
+            <th:block th:each="i : ${#numbers.sequence(0, nominas.totalPages - 1)}">
+                <th:block th:if="${i == nominas.number}">
+                    <span class="active" th:text="${i + 1}"></span>
+                </th:block>
+                <th:block th:unless="${i == nominas.number}">
+                    <a th:with="baseUrlPagina=@{/admin/nominas/consultar(page=${i}, size=${nominas.size}, empleadoId=${empleadoIdSeleccionado}, fechaDesde=${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}, fechaHasta=${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''})}"
+                       th:href="${baseUrlPagina + pageableParams}"
+                       th:text="${i + 1}">
+                    </a>
+                </th:block>
+            </th:block>
+
+            <th:block th:if="${nominas.hasNext()}">
+                <a th:with="baseUrlSiguiente=@{/admin/nominas/consultar(page=${nominas.number + 1}, size=${nominas.size}, empleadoId=${empleadoIdSeleccionado}, fechaDesde=${fechaDesde != null ? #temporals.format(fechaDesde, 'yyyy-MM-dd') : ''}, fechaHasta=${fechaHasta != null ? #temporals.format(fechaHasta, 'yyyy-MM-dd') : ''})}"
+                   th:href="${baseUrlSiguiente + pageableParams}">
+                    Siguiente &raquo;
+                </a>
+            </th:block>
+            <span th:unless="${nominas.hasNext()}" class="disabled">Siguiente &raquo;</span>
+        </div>
+
+    </div>
+    <div th:if="${nominas == null || nominas.isEmpty()}" class="no-results"> <p>No se encontraron nóminas con los criterios seleccionados.</p>
+    </div>
+    <div style="margin-top: 20px;">
+        <a th:href="@{/admin/area_personal}" class="btn btn-secondary">Volver al Área Personal</a>
+    </div>
+</div>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>
