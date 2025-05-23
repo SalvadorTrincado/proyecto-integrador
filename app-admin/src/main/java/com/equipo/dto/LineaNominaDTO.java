@@ -1,0 +1,34 @@
+package com.equipo.dto;
+
+import com.equipo.entity.LineaNomina; // Necesitarás importar el enum
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import java.math.BigDecimal;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LineaNominaDTO {
+
+    private String id; // UUID como String para el DTO, opcional para creación
+
+    @NotBlank(message = "El concepto de la línea de nómina es obligatorio.")
+    private String concepto;
+
+    @Digits(integer = 3, fraction = 2, message = "El porcentaje debe tener un formato válido (ej. 10.00).")
+    private BigDecimal porcentaje; // Puede ser nulo si se introduce la cantidad directamente
+
+    @NotNull(message = "La cantidad es obligatoria si no se especifica un porcentaje.")
+    @DecimalMin(value = "0.0", inclusive = false, message = "La cantidad debe ser diferente de cero si el porcentaje es nulo.") // Ojo: permitimos negativo para deducciones
+    @Digits(integer = 8, fraction = 2, message = "La cantidad debe tener un formato válido.")
+    private BigDecimal cantidad;
+
+    @NotNull(message = "El tipo de línea (DEVENGOS/DEDUCCIONES) es obligatorio.")
+    private LineaNomina.TipoLinea tipo;
+}

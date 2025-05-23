@@ -1,0 +1,14 @@
+#FileLock
+<<<<<<< HEAD
+#Fri May 23 10:14:57 CEST 2025
+server=172.74.217.21\:54275
+hostName=Andriy
+method=file
+id=196fc35a9521b4a8bf32115fdaac892460dac3bc450
+=======
+#Fri May 23 13:17:18 CEST 2025
+server=10.227.189.203\:53197
+hostName=Salvador
+method=file
+id=196fcdc9c2d74cd1190bb58c9bdf33d2a78aa823c0c
+>>>>>>> e3d3107 (arreglo css)

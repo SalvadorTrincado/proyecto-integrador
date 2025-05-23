@@ -1,0 +1,234 @@
+package com.equipo.controller;
+
+import com.equipo.dto.AltaNominaDTO; // Usaremos este DTO también para la modificación
+import com.equipo.dto.NominaDetalleDTO;
+import com.equipo.entity.Nomina;
+import com.equipo.service.NominaService;
+import com.equipo.entity.Empleado; // Necesario para listar empleados
+import com.equipo.service.EmpleadoService; // Necesario para listar empleados
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Controller
+@RequestMapping("/admin/nominas") // Prefijo para las rutas MVC de nóminas de admin
+public class NominaAdminMvcController {
+
+    private final NominaService nominaService;
+    private final EmpleadoService empleadoService; // Para obtener lista de empleados
+
+    @Autowired
+    public NominaAdminMvcController(NominaService nominaService, EmpleadoService empleadoService) {
+        this.nominaService = nominaService;
+        this.empleadoService = empleadoService;
+    }
+
+    // --- MODIFICACIÓN DE NÓMINA (Funcionalidad 11 - MVC) ---
+
+    /**
+     * Muestra el formulario para modificar una nómina existente.
+     */
+    @GetMapping("/modificar/{id}")
+    public String mostrarFormularioModificarNomina(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            UUID nominaId = UUID.fromString(id);
+            Optional<NominaDetalleDTO> nominaOpt = nominaService.findNominaDetalleById(nominaId);
+
+            if (nominaOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Nómina no encontrada con ID: " + id);
+                return "redirect:nominas/consultar"; // O a otra página de listado/error
+            }
+
+            NominaDetalleDTO nominaDetalle = nominaOpt.get();
+
+            // Validar si la nómina es modificable (no pasada/cobrada)
+            LocalDate hoy = LocalDate.now();
+            LocalDate ultimoDiaMesAnterior = hoy.withDayOfMonth(1).minusDays(1);
+            if (nominaDetalle.getFechaFinPeriodo().isBefore(ultimoDiaMesAnterior)) {
+                redirectAttributes.addFlashAttribute("error", "No se pueden modificar nóminas de períodos ya cerrados.");
+                return "redirect:nominas/detalle/" + id; // Volver al detalle con mensaje
+            }
+
+            // Convertir NominaDetalleDTO a AltaNominaDTO para el formulario
+            AltaNominaDTO altaNominaDTO = new AltaNominaDTO();
+            altaNominaDTO.setEmpleadoId(nominaDetalle.getEmpleadoId());
+            altaNominaDTO.setFechaInicioPeriodo(nominaDetalle.getFechaInicioPeriodo());
+            altaNominaDTO.setFechaFinPeriodo(nominaDetalle.getFechaFinPeriodo());
+            altaNominaDTO.setNombreEmpresa(nominaDetalle.getNombreEmpresa());
+            altaNominaDTO.setCifEmpresa(nominaDetalle.getCifEmpresa());
+            altaNominaDTO.setDireccionEmpresa(nominaDetalle.getDireccionEmpresa());
+            altaNominaDTO.setLineasNomina(nominaDetalle.getLineasNomina()); // Asumiendo que LineaNominaDTO es compatible
+
+            model.addAttribute("altaNominaDTO", altaNominaDTO);
+            model.addAttribute("nominaId", id); // Para el action del form
+            model.addAttribute("empleadoNombre", nominaDetalle.getNombreCompletoEmpleado()); // Para mostrar el nombre
+
+            // No necesitamos la lista de todos los empleados para modificar una nómina existente,
+            // ya que el empleado de la nómina no debería cambiar.
+
+            return "nominas/formulario_nomina"; // Usaremos una vista genérica para alta/modificación
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "ID de nómina inválido: " + id);
+            return "redirect:nominas/consultar";
+        }
+    }
+
+    /**
+     * Procesa el envío del formulario de modificación de nómina.
+     */
+    @PostMapping("/modificar/{id}")
+    public String procesarModificarNomina(@PathVariable String id,
+                                          @Valid @ModelAttribute("altaNominaDTO") AltaNominaDTO altaNominaDTO,
+                                          BindingResult result,
+                                          Model model,
+                                          RedirectAttributes redirectAttributes) {
+        UUID nominaId;
+        try {
+            nominaId = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "ID de nómina inválido.");
+            return "redirect:nominas/consultar";
+        }
+
+        // Obtener el nombre del empleado para mostrarlo en caso de error en el formulario
+        // Esto es importante porque el altaNominaDTO solo tiene el empleadoId
+        Optional<NominaDetalleDTO> nominaOriginalOpt = nominaService.findNominaDetalleById(nominaId);
+        if (nominaOriginalOpt.isPresent()) {
+            model.addAttribute("empleadoNombre", nominaOriginalOpt.get().getNombreCompletoEmpleado());
+        } else {
+            // Esto no debería pasar si se llegó al POST desde un GET válido
+            model.addAttribute("empleadoNombre", "Desconocido");
+        }
+        model.addAttribute("nominaId", id);
+
+
+        if (result.hasErrors()) {
+            // Si hay errores de validación del DTO, se vuelve al formulario
+            model.addAttribute("error", "Por favor, corrija los errores en el formulario.");
+            return "nominas/formulario_nomina";
+        }
+
+        try {
+            nominaService.modificarNomina(nominaId, altaNominaDTO);
+            redirectAttributes.addFlashAttribute("exito", "Nómina modificada correctamente.");
+            return "redirect:/nominas/detalle/" + id;
+        } catch (IllegalArgumentException | EntityNotFoundException e) {
+            model.addAttribute("error", e.getMessage());
+            return "nominas/formulario_nomina";
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Ocurrió un error inesperado al modificar la nómina.");
+            return "nominas/formulario_nomina";
+        }
+    }
+
+    // --- ALTA DE NÓMINA (MVC - Complementario al API Rest) ---
+    // Aunque el PDF indica API Rest para el alta, tener una interfaz MVC puede ser útil.
+    // Si no es requerida, esta sección puede omitirse.
+
+    /**
+     * Muestra el formulario para crear una nueva nómina.
+     */
+    @GetMapping("/crear")
+    public String mostrarFormularioCrearNomina(Model model) {
+        if (!model.containsAttribute("altaNominaDTO")) { // Para no sobreescribir si viene de un redirect con error
+            model.addAttribute("altaNominaDTO", new AltaNominaDTO());
+        }
+        List<Empleado> empleados = empleadoService.obtenerTodosLosEmpleados(); // Necesario para el selector de empleado
+        model.addAttribute("empleados", empleados);
+        model.addAttribute("esCreacion", true); // Para diferenciar en la vista si es necesario
+        return "nominas/formulario_nomina";
+    }
+
+    /**
+     * Procesa el envío del formulario de creación de nómina.
+     */
+    @PostMapping("/crear")
+    public String procesarCrearNomina(@Valid @ModelAttribute("altaNominaDTO") AltaNominaDTO altaNominaDTO,
+                                      BindingResult result,
+                                      Model model,
+                                      RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            model.addAttribute("error", "Por favor, corrija los errores en el formulario.");
+            List<Empleado> empleados = empleadoService.obtenerTodosLosEmpleados();
+            model.addAttribute("empleados", empleados);
+            model.addAttribute("esCreacion", true);
+            return "nominas/formulario_nomina";
+        }
+
+        try {
+            Nomina nuevaNomina = nominaService.crearNomina(altaNominaDTO);
+            redirectAttributes.addFlashAttribute("exito", "Nómina creada correctamente con ID: " + nuevaNomina.getId());
+            return "redirect:nominas/detalle/" + nuevaNomina.getId().toString();
+        } catch (IllegalArgumentException | EntityNotFoundException e) {
+            redirectAttributes.addFlashAttribute("altaNominaDTO", altaNominaDTO); // Para repoblar el form
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:nominas/crear"; // Vuelve al formulario con los datos y el error
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("altaNominaDTO", altaNominaDTO);
+            redirectAttributes.addFlashAttribute("error", "Ocurrió un error inesperado al crear la nómina.");
+            return "redirect:nominas/crear";
+        }
+    }
+
+    // --- DETALLE DE NÓMINA (Funcionalidad 13 - MVC) ---
+    @GetMapping("/detalle/{id}")
+    public String mostrarDetalleNomina(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            UUID nominaId = UUID.fromString(id);
+            Optional<NominaDetalleDTO> nominaOpt = nominaService.findNominaDetalleById(nominaId);
+
+            if (nominaOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Nómina no encontrada con ID: " + id);
+                return "redirect:nominas/consultar";
+            }
+            model.addAttribute("nomina", nominaOpt.get());
+            return "nominas/detalle_nomina";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", "ID de nómina inválido: " + id);
+            return "redirect:nominas/consultar";
+        }
+    }
+
+    // --- CONSULTA PARAMETRIZADA (Funcionalidad 14 - MVC) ---
+    @GetMapping("/consultar")
+    public String mostrarConsultaNominas(
+            @RequestParam(required = false) String empleadoId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+            @PageableDefault(size = 10, sort = "fechaInicioPeriodo") Pageable pageable,
+            Model model) {
+
+        Page<NominaDetalleDTO> nominas = nominaService.findNominasByEmpleadoAndPeriodoForAdmin(empleadoId, fechaDesde, fechaHasta, pageable);
+        List<Empleado> empleados = empleadoService.obtenerTodosLosEmpleados(); // Para el desplegable de filtro
+
+        model.addAttribute("nominas", nominas);
+        model.addAttribute("empleados", empleados);
+        model.addAttribute("empleadoIdSeleccionado", empleadoId);
+        model.addAttribute("fechaDesde", fechaDesde);
+        model.addAttribute("fechaHasta", fechaHasta);
+        // Para mantener los parámetros de paginación y orden en los enlaces
+        model.addAttribute("pageableParams",
+                (pageable.getSort().isSorted() ? "&sort=" + pageable.getSort().toString().replace(": ", ",") : "")
+        );
+
+
+        return "nominas/lista_nominas";
+    }
+}

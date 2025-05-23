@@ -2,17 +2,156 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta de Empleados</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding-top: 20px; }
+    .container { max-width: 900px; }
+    form { margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+    label { display: block; margin-bottom: 8px; }
+    input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    a.btn-secondary { display: inline-block; padding: 8px 12px; margin-top: 10px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+    a.btn-secondary:hover { background-color: #5a6268; }
+    #resultadosEmpleadosContainer { margin-top: 30px; }
+    .table-responsive { margin-top: 20px; }
+    .alert { margin-top: 20px; }
+  </style>
 </head>
 <body>
-<h2>Consulta de Empleados</h2>
-<form th:action="@{/admin/resultados-empleados}" method="get">
-  <label>Nombre: <input type="text" name="nombre"/></label><br>
-  <label>Departamento: <input type="text" name="departamento"/></label><br>
-  <label>Salario mínimo: <input type="number" name="salarioMinimo" step="0.01"/></label><br>
-  <label>Salario máximo: <input type="number" name="salarioMaximo" step="0.01"/></label><br>
-  <button type="submit">Buscar</button>
-</form>
-<a th:href="@{/admin/area_personal}">Volver al área personal</a>
+<div class="container">
+  <h2>Consulta de Empleados</h2>
+  <form id="consultaEmpleadosForm">
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="nombre">Nombre:</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre del empleado"/>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="departamento">Departamento:</label>
+        <input type="text" class="form-control" id="departamento" name="departamento" placeholder="Departamento"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="salarioMinimo">Salario mínimo (€):</label>
+        <input type="number" class="form-control" id="salarioMinimo" name="salarioMinimo" step="0.01" placeholder="Ej: 1200.50"/>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="salarioMaximo">Salario máximo (€):</label>
+        <input type="number" class="form-control" id="salarioMaximo" name="salarioMaximo" step="0.01" placeholder="Ej: 2500.00"/>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </form>
+
+  <div id="resultadosEmpleadosContainer">
+  </div>
+
+  <a th:href="@{/admin/area_personal}" class="btn btn-secondary mt-3">Volver al Área Personal</a>
+</div>
+
+<script>
+  // Función para realizar la búsqueda y mostrar resultados
+  function buscarYMostrarEmpleados(queryParams) {
+    fetch(`/api/admin/empleados?${queryParams.toString()}`)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Error en la red: ' + response.statusText);
+              }
+              return response.json();
+            })
+            .then(data => {
+              const resultadosContainer = document.getElementById('resultadosEmpleadosContainer');
+              resultadosContainer.innerHTML = ''; // Limpiar resultados anteriores
+
+              const nombre = queryParams.get('nombre');
+              const departamento = queryParams.get('departamento');
+              const salarioMinimo = queryParams.get('salarioMinimo');
+              const salarioMaximo = queryParams.get('salarioMaximo');
+
+              const criterios = [];
+              if (nombre) criterios.push(`Nombre: '${nombre}'`);
+              if (departamento) criterios.push(`Departamento: '${departamento}'`);
+              if (salarioMinimo) criterios.push(`Salario Mínimo: ${salarioMinimo}€`);
+              if (salarioMaximo) criterios.push(`Salario Máximo: ${salarioMaximo}€`);
+
+              let tituloResultados = "";
+              if (criterios.length > 0) {
+                tituloResultados = `<h3>Resultados para: ${criterios.join(', ')}</h3>`;
+              } else {
+                // Si no hay queryParams, significa que es la carga inicial o una búsqueda sin filtros
+                tituloResultados = `<h3>Mostrando todos los empleados</h3>`;
+              }
+              resultadosContainer.innerHTML += tituloResultados;
+
+              if (data && data.length > 0) {
+                let tableHtml = `<div class="table-responsive">
+                             <table class="table table-striped table-bordered">
+                               <thead class="thead-dark">
+                                 <tr>
+                                   <th>ID</th>
+                                   <th>Nombre</th>
+                                   <th>Apellidos</th>
+                                   <th>Departamento</th>
+                                   <th>Salario Base (€)</th>
+                                   <th>Fecha Incorporación</th>
+                                   <th>Email</th>
+                                   <th>Edad</th>
+                                   <th>País Nacimiento</th>
+                                 </tr>
+                               </thead>
+                               <tbody>`;
+                data.forEach(empleado => {
+                  tableHtml += `<tr>
+                            <td>${empleado.id || 'N/A'}</td>
+                            <td>${empleado.nombre || 'N/A'}</td>
+                            <td>${empleado.apellidos || 'N/A'}</td>
+                            <td>${empleado.departamento || 'N/A'}</td>
+                            <td>${empleado.salarioBaseMensual ? Number(empleado.salarioBaseMensual).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }) : 'N/A'}</td>
+                            <td>${empleado.fechaIncorporacion ? new Date(empleado.fechaIncorporacion).toLocaleDateString('es-ES') : 'N/A'}</td>
+                            <td>${empleado.email || 'N/A'}</td>
+                            <td>${empleado.edad || 'N/A'}</td>
+                            <td>${empleado.paisNacimiento || 'N/A'}</td>
+                          </tr>`;
+                });
+                tableHtml += `</tbody></table></div>`;
+                resultadosContainer.innerHTML += tableHtml;
+              } else {
+                resultadosContainer.innerHTML += '<div class="alert alert-info mt-3" role="alert">No se encontraron empleados con los criterios de búsqueda especificados.</div>';
+              }
+            })
+            .catch(error => {
+              const resultadosContainer = document.getElementById('resultadosEmpleadosContainer');
+              resultadosContainer.innerHTML = '<div class="alert alert-danger mt-3" role="alert">Error al realizar la búsqueda: ' + error.message + '</div>';
+              console.error('Error en la búsqueda:', error);
+            });
+  }
+
+  // Event listener para el envío del formulario
+  document.getElementById('consultaEmpleadosForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evitar el envío tradicional del formulario
+
+    const nombre = document.getElementById('nombre').value;
+    const departamento = document.getElementById('departamento').value;
+    const salarioMinimo = document.getElementById('salarioMinimo').value;
+    const salarioMaximo = document.getElementById('salarioMaximo').value;
+
+    let queryParams = new URLSearchParams();
+    if (nombre) queryParams.append('nombre', nombre);
+    if (departamento) queryParams.append('departamento', departamento);
+    if (salarioMinimo) queryParams.append('salarioMinimo', salarioMinimo);
+    if (salarioMaximo) queryParams.append('salarioMaximo', salarioMaximo);
+
+    buscarYMostrarEmpleados(queryParams);
+  });
+
+  // Cargar todos los empleados cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', function() {
+    buscarYMostrarEmpleados(new URLSearchParams()); // Pasa URLSearchParams vacío para obtener todos
+  });
+</script>
 </body>
 </html>

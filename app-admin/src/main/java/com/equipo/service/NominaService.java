@@ -1,0 +1,459 @@
+package com.equipo.service; // Ahora en el paquete service de app-admin
+
+import com.equipo.dto.AltaNominaDTO;     // Importa DTO de app-admin
+import com.equipo.dto.LineaNominaDTO;    // Importa DTO de app-admin
+import com.equipo.dto.NominaDetalleDTO;  // Importa DTO de app-admin
+import com.equipo.entity.Empleado;         // Importa entidad de common
+import com.equipo.entity.LineaNomina;      // Importa entidad de common
+import com.equipo.entity.Nomina;           // Importa entidad de common
+import com.equipo.repository.EmpleadoRepository;   // Importa repo de common
+import com.equipo.repository.NominaRepository;     // Importa repo de common
+import com.equipo.repository.LineaNominaRepository; // Importa repo de common
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class NominaService {
+
+    private final NominaRepository nominaRepository;
+    private final EmpleadoRepository empleadoRepository;
+    private final LineaNominaRepository lineaNominaRepository;
+
+    @Autowired
+    public NominaService(NominaRepository nominaRepository,
+                         EmpleadoRepository empleadoRepository,
+                         LineaNominaRepository lineaNominaRepository) {
+        this.nominaRepository = nominaRepository;
+        this.empleadoRepository = empleadoRepository;
+        this.lineaNominaRepository = lineaNominaRepository;
+    }
+
+    @Transactional
+    public Nomina crearNomina(AltaNominaDTO altaNominaDto) throws IllegalArgumentException {
+        UUID empleadoId = UUID.fromString(altaNominaDto.getEmpleadoId());
+        Empleado empleado = empleadoRepository.findById(empleadoId)
+                .orElseThrow(() -> new EntityNotFoundException("Empleado no encontrado con ID: " + empleadoId));
+
+        // 1. Validar periodo
+        if (altaNominaDto.getFechaInicioPeriodo().isAfter(altaNominaDto.getFechaFinPeriodo())) {
+            throw new IllegalArgumentException("La fecha de inicio del período no puede ser posterior a la fecha de fin.");
+        }
+        if (altaNominaDto.getFechaInicioPeriodo().getDayOfMonth() != 1) {
+            throw new IllegalArgumentException("La fecha de inicio del período debe ser el primer día del mes.");
+        }
+        if (altaNominaDto.getFechaFinPeriodo().getDayOfMonth() != altaNominaDto.getFechaFinPeriodo().lengthOfMonth()) {
+            throw new IllegalArgumentException("La fecha de fin del período debe ser el último día del mes.");
+        }
+
+
+        // 2. Comprobar solapamiento de periodos
+        List<Nomina> nominasSolapadas = nominaRepository.findByEmpleadoAndPeriodoSolapado(
+                empleado,
+                altaNominaDto.getFechaInicioPeriodo(),
+                altaNominaDto.getFechaFinPeriodo()
+        );
+        if (!nominasSolapadas.isEmpty()) {
+            throw new IllegalArgumentException("Ya existe una nómina para este empleado que se solapa con el período especificado.");
+        }
+
+        // 3. Validar que la fecha de inicio sea posterior a la fecha de finalización de la última nómina cobrada
+        Optional<Nomina> ultimaNominaOpt = nominaRepository.findTopByEmpleadoOrderByFechaFinPeriodoDesc(empleado);
+        if (ultimaNominaOpt.isPresent()) {
+            if (!altaNominaDto.getFechaInicioPeriodo().isAfter(ultimaNominaOpt.get().getFechaFinPeriodo())) {
+                throw new IllegalArgumentException("La fecha de inicio de la nueva nómina debe ser posterior al " + ultimaNominaOpt.get().getFechaFinPeriodo());
+            }
+        }
+
+        // 4. Validar si se pueden modificar nóminas pasadas (para creación, esto implica que no sea un mes ya cerrado)
+        LocalDate hoy = LocalDate.now();
+        LocalDate ultimoDiaMesAnterior = hoy.withDayOfMonth(1).minusDays(1); // [cite: 88]
+        if (altaNominaDto.getFechaFinPeriodo().isBefore(ultimoDiaMesAnterior) || altaNominaDto.getFechaFinPeriodo().isEqual(ultimoDiaMesAnterior)) { // [cite: 88]
+            throw new IllegalArgumentException("No se pueden crear nóminas para períodos ya cerrados (anteriores al último día del mes anterior)."); // [cite: 88]
+        }
+
+
+        Nomina nomina = new Nomina();
+        nomina.setEmpleado(empleado);
+        nomina.setFechaInicioPeriodo(altaNominaDto.getFechaInicioPeriodo());
+        nomina.setFechaFinPeriodo(altaNominaDto.getFechaFinPeriodo());
+
+        nomina.setNombreEmpresa(altaNominaDto.getNombreEmpresa());
+        nomina.setCifEmpresa(altaNominaDto.getCifEmpresa());
+        nomina.setDireccionEmpresa(altaNominaDto.getDireccionEmpresa());
+
+        nomina.setNombreCompletoEmpleado(empleado.getNombre() + " " + empleado.getApellidos());
+        nomina.setIdentificacionEmpleado(empleado.getDocumento());
+        nomina.setDireccionEmpleado(empleado.getLocalidadDireccionPpal());
+        nomina.setPuestoProfesionalEmpleado(empleado.getCategoriaProfesional());
+        nomina.setDepartamentoEmpleado(empleado.getDepartamento());
+        nomina.setFechaAltaEmpleado(empleado.getFechaIncorporacion());
+
+
+        BigDecimal totalDevengos = BigDecimal.ZERO;
+        BigDecimal totalDeducciones = BigDecimal.ZERO;
+        BigDecimal salarioBase = BigDecimal.ZERO;
+
+        if (altaNominaDto.getLineasNomina() == null || altaNominaDto.getLineasNomina().isEmpty()) {
+            throw new IllegalArgumentException("La nómina debe tener al menos una línea de nómina."); // [cite: 157]
+        }
+
+        boolean salarioBaseEncontrado = false;
+        List<String> conceptosUsados = new ArrayList<>();
+
+        for (LineaNominaDTO lineaDto : altaNominaDto.getLineasNomina()) {
+            if (lineaDto.getConcepto() == null || lineaDto.getConcepto().trim().isEmpty()) { // [cite: 158]
+                throw new IllegalArgumentException("El concepto de una línea de nómina no puede estar vacío.");
+            }
+            if (conceptosUsados.contains(lineaDto.getConcepto().trim().toLowerCase())) { // [cite: 159]
+                throw new IllegalArgumentException("No puede haber dos conceptos con el mismo nombre en la nómina: " + lineaDto.getConcepto());
+            }
+            conceptosUsados.add(lineaDto.getConcepto().trim().toLowerCase());
+
+
+            LineaNomina linea = new LineaNomina();
+            linea.setConcepto(lineaDto.getConcepto());
+            linea.setTipo(lineaDto.getTipo());
+
+            if ("Salario base".equalsIgnoreCase(lineaDto.getConcepto().trim())) { // [cite: 112, 157]
+                salarioBaseEncontrado = true;
+                if (lineaDto.getPorcentaje() != null) {
+                    throw new IllegalArgumentException("El Salario Base no puede tener un porcentaje asociado.");
+                }
+                if (lineaDto.getCantidad() == null || lineaDto.getCantidad().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException("El Salario Base debe tener una cantidad positiva.");
+                }
+                salarioBase = lineaDto.getCantidad();
+                linea.setCantidad(lineaDto.getCantidad());
+                linea.setPorcentaje(null);
+            } else {
+                if (lineaDto.getPorcentaje() != null && lineaDto.getCantidad() != null) { // [cite: 125]
+                    throw new IllegalArgumentException("Una línea de nómina no puede tener porcentaje y cantidad definidos simultáneamente (concepto: " + lineaDto.getConcepto() + ").");
+                }
+                if (lineaDto.getPorcentaje() == null && lineaDto.getCantidad() == null) {
+                    throw new IllegalArgumentException("Debe especificar porcentaje o cantidad para el concepto: " + lineaDto.getConcepto());
+                }
+
+                if (lineaDto.getPorcentaje() != null) { // [cite: 123, 161]
+                    if (salarioBase.compareTo(BigDecimal.ZERO) == 0 && !salarioBaseEncontrado) {
+                        throw new IllegalArgumentException("El salario base debe definirse antes de calcular líneas por porcentaje.");
+                    }
+                    BigDecimal cantidadCalculada = salarioBase.multiply(lineaDto.getPorcentaje().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+                    linea.setCantidad(cantidadCalculada);
+                    linea.setPorcentaje(lineaDto.getPorcentaje());
+                } else {
+                    if (lineaDto.getCantidad().compareTo(BigDecimal.ZERO) == 0) { // [cite: 160]
+                        throw new IllegalArgumentException("La cantidad para el concepto '" + lineaDto.getConcepto() + "' no puede ser cero si no se especifica porcentaje.");
+                    }
+                    linea.setCantidad(lineaDto.getCantidad());
+                    linea.setPorcentaje(null);
+                }
+            }
+
+            nomina.addLineaNomina(linea);
+
+            if (linea.getTipo() == LineaNomina.TipoLinea.DEVENGOS) {
+                totalDevengos = totalDevengos.add(linea.getCantidad());
+            } else if (linea.getTipo() == LineaNomina.TipoLinea.DEDUCCIONES) {
+                totalDeducciones = totalDeducciones.add(linea.getCantidad().abs()); // Asumimos que las deducciones son cantidades positivas y el tipo lo indica
+            }
+        }
+
+        if (!salarioBaseEncontrado) { // [cite: 157]
+            throw new IllegalArgumentException("La nómina debe incluir una línea de 'Salario base'.");
+        }
+
+        nomina.setTotalDevengos(totalDevengos);
+        nomina.setTotalDeducciones(totalDeducciones);
+        BigDecimal netoAPercibir = totalDevengos.subtract(totalDeducciones);
+        nomina.setNetoAPercibir(netoAPercibir);
+
+        if (netoAPercibir.compareTo(BigDecimal.ZERO) < 0) { // [cite: 109, 156]
+            throw new IllegalArgumentException("El salario neto a percibir no puede ser negativo.");
+        }
+
+        return nominaRepository.save(nomina);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<NominaDetalleDTO> findNominaDetalleById(UUID nominaId) {
+        return nominaRepository.findById(nominaId).map(this::convertToDetalleDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<NominaDetalleDTO> findAllNominasByAdmin(Pageable pageable) {
+        return nominaRepository.findAll(pageable).map(this::convertToDetalleDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<NominaDetalleDTO> findNominasByEmpleadoAndPeriodoForAdmin(String empleadoIdStr, LocalDate fechaDesde, LocalDate fechaHasta, Pageable pageable) {
+        Page<Nomina> nominasPagina;
+        if (empleadoIdStr != null && !empleadoIdStr.trim().isEmpty()) {
+            UUID empleadoId = UUID.fromString(empleadoIdStr);
+            Empleado empleado = empleadoRepository.findById(empleadoId)
+                    .orElseThrow(() -> new EntityNotFoundException("Empleado no encontrado con ID: " + empleadoId));
+            if (fechaDesde != null && fechaHasta != null) {
+                nominasPagina = nominaRepository.findByEmpleadoAndFechaInicioPeriodoGreaterThanEqualAndFechaFinPeriodoLessThanEqual(empleado, fechaDesde, fechaHasta, pageable);
+            } else {
+                nominasPagina = nominaRepository.findByEmpleado(empleado, pageable);
+            }
+        } else { // Sin empleadoId, solo filtra por fechas si están presentes
+            if (fechaDesde != null && fechaHasta != null) {
+                nominasPagina = nominaRepository.findByFechaInicioPeriodoGreaterThanEqualAndFechaFinPeriodoLessThanEqual(fechaDesde, fechaHasta, pageable);
+            } else {
+                nominasPagina = nominaRepository.findAll(pageable); // O manejar de otra forma si no hay filtros
+            }
+        }
+        return nominasPagina.map(this::convertToDetalleDto);
+    }
+
+
+    @Transactional
+    public Nomina modificarNomina(UUID nominaId, AltaNominaDTO modificacionNominaDto) throws IllegalArgumentException {
+        Nomina nominaExistente = nominaRepository.findById(nominaId)
+                .orElseThrow(() -> new EntityNotFoundException("Nómina no encontrada con ID: " + nominaId));
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate ultimoDiaMesAnterior = hoy.withDayOfMonth(1).minusDays(1);
+        if (nominaExistente.getFechaFinPeriodo().isBefore(ultimoDiaMesAnterior)) { // [cite: 88]
+            throw new IllegalArgumentException("No se pueden modificar nóminas de períodos ya cerrados (anteriores al " + ultimoDiaMesAnterior + ")."); // [cite: 88]
+        }
+
+        // Validar que el empleado de la nómina no cambie
+        if (!UUID.fromString(modificacionNominaDto.getEmpleadoId()).equals(nominaExistente.getEmpleado().getId())) {
+            throw new IllegalArgumentException("No se puede cambiar el empleado de una nómina existente.");
+        }
+
+        // Validar que las nuevas fechas no se solapen con OTRAS nóminas del mismo empleado
+        List<Nomina> nominasSolapadas = nominaRepository.findByEmpleadoAndPeriodoSolapado(
+                nominaExistente.getEmpleado(),
+                modificacionNominaDto.getFechaInicioPeriodo(),
+                modificacionNominaDto.getFechaFinPeriodo()
+        ).stream().filter(n -> !n.getId().equals(nominaId)).collect(Collectors.toList());
+
+        if (!nominasSolapadas.isEmpty()) {
+            throw new IllegalArgumentException("El nuevo período se solapa con otra nómina existente para este empleado.");
+        }
+
+        nominaExistente.setFechaInicioPeriodo(modificacionNominaDto.getFechaInicioPeriodo());
+        nominaExistente.setFechaFinPeriodo(modificacionNominaDto.getFechaFinPeriodo());
+
+        nominaExistente.setNombreEmpresa(modificacionNominaDto.getNombreEmpresa());
+        nominaExistente.setCifEmpresa(modificacionNominaDto.getCifEmpresa());
+        nominaExistente.setDireccionEmpresa(modificacionNominaDto.getDireccionEmpresa());
+
+        // Los datos del empleado (nombre, identificacion, etc.) en la nómina son un snapshot, no se actualizan desde el empleado al modificar la nómina.
+        // Se asume que si se modificó el empleado, se crea una nueva nómina o se maneja de otra forma.
+
+        nominaExistente.getLineasNomina().clear(); // Eliminar líneas antiguas
+        lineaNominaRepository.flush(); // Asegura que las eliminaciones se ejecuten antes de añadir nuevas
+        // Esto es importante para evitar conflictos si se reinsertan conceptos con el mismo nombre (aunque el UUID sería diferente)
+        // o para que orphanRemoval actúe.
+
+        BigDecimal totalDevengos = BigDecimal.ZERO;
+        BigDecimal totalDeducciones = BigDecimal.ZERO;
+        BigDecimal salarioBase = BigDecimal.ZERO;
+        boolean salarioBaseEncontrado = false;
+        List<String> conceptosUsados = new ArrayList<>();
+
+        for (LineaNominaDTO lineaDto : modificacionNominaDto.getLineasNomina()) {
+            if (lineaDto.getConcepto() == null || lineaDto.getConcepto().trim().isEmpty()) {
+                throw new IllegalArgumentException("El concepto de una línea de nómina no puede estar vacío.");
+            }
+            if (conceptosUsados.contains(lineaDto.getConcepto().trim().toLowerCase())) {
+                throw new IllegalArgumentException("No puede haber dos conceptos con el mismo nombre en la nómina: " + lineaDto.getConcepto());
+            }
+            conceptosUsados.add(lineaDto.getConcepto().trim().toLowerCase());
+
+            LineaNomina linea = new LineaNomina();
+            linea.setConcepto(lineaDto.getConcepto());
+            linea.setTipo(lineaDto.getTipo());
+
+            if ("Salario base".equalsIgnoreCase(lineaDto.getConcepto().trim())) {
+                salarioBaseEncontrado = true;
+                if (lineaDto.getPorcentaje() != null) {
+                    throw new IllegalArgumentException("El Salario Base no puede tener un porcentaje asociado.");
+                }
+                if (lineaDto.getCantidad() == null || lineaDto.getCantidad().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException("El Salario Base debe tener una cantidad positiva.");
+                }
+                salarioBase = lineaDto.getCantidad();
+                linea.setCantidad(lineaDto.getCantidad());
+                linea.setPorcentaje(null);
+            } else {
+                if (lineaDto.getPorcentaje() != null && lineaDto.getCantidad() != null) {
+                    throw new IllegalArgumentException("Una línea de nómina no puede tener porcentaje y cantidad definidos simultáneamente (concepto: " + lineaDto.getConcepto() + ").");
+                }
+                if (lineaDto.getPorcentaje() == null && lineaDto.getCantidad() == null) {
+                    throw new IllegalArgumentException("Debe especificar porcentaje o cantidad para el concepto: " + lineaDto.getConcepto());
+                }
+
+                if (lineaDto.getPorcentaje() != null) {
+                    if (salarioBase.compareTo(BigDecimal.ZERO) == 0 && !salarioBaseEncontrado) {
+                        throw new IllegalArgumentException("El salario base debe definirse antes de calcular líneas por porcentaje.");
+                    }
+                    BigDecimal cantidadCalculada = salarioBase.multiply(lineaDto.getPorcentaje().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+                    linea.setCantidad(cantidadCalculada);
+                    linea.setPorcentaje(lineaDto.getPorcentaje());
+                } else {
+                    if (lineaDto.getCantidad().compareTo(BigDecimal.ZERO) == 0) {
+                        throw new IllegalArgumentException("La cantidad para el concepto '" + lineaDto.getConcepto() + "' no puede ser cero si no se especifica porcentaje.");
+                    }
+                    linea.setCantidad(lineaDto.getCantidad());
+                    linea.setPorcentaje(null);
+                }
+            }
+            nominaExistente.addLineaNomina(linea);
+
+            if (linea.getTipo() == LineaNomina.TipoLinea.DEVENGOS) {
+                totalDevengos = totalDevengos.add(linea.getCantidad());
+            } else if (linea.getTipo() == LineaNomina.TipoLinea.DEDUCCIONES) {
+                totalDeducciones = totalDeducciones.add(linea.getCantidad().abs());
+            }
+        }
+        if (!salarioBaseEncontrado) {
+            throw new IllegalArgumentException("La nómina debe incluir una línea de 'Salario base'.");
+        }
+
+        nominaExistente.setTotalDevengos(totalDevengos);
+        nominaExistente.setTotalDeducciones(totalDeducciones);
+        BigDecimal netoAPercibir = totalDevengos.subtract(totalDeducciones);
+        nominaExistente.setNetoAPercibir(netoAPercibir);
+
+        if (netoAPercibir.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El salario neto a percibir no puede ser negativo.");
+        }
+
+        return nominaRepository.save(nominaExistente);
+    }
+
+
+    @Transactional
+    public void eliminarNomina(UUID nominaId) throws IllegalArgumentException {
+        Nomina nomina = nominaRepository.findById(nominaId)
+                .orElseThrow(() -> new EntityNotFoundException("Nómina no encontrada con ID: " + nominaId));
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate ultimoDiaMesAnterior = hoy.withDayOfMonth(1).minusDays(1);
+
+        if (nomina.getFechaFinPeriodo().isBefore(ultimoDiaMesAnterior)) { // [cite: 88]
+            throw new IllegalArgumentException("No se pueden eliminar nóminas de períodos ya cerrados (anteriores al " + ultimoDiaMesAnterior + ")."); // [cite: 88]
+        }
+
+        nominaRepository.delete(nomina);
+    }
+
+    @Transactional
+    public Nomina eliminarLineaDeNomina(UUID nominaId, UUID lineaNominaId) {
+        Nomina nomina = nominaRepository.findById(nominaId)
+                .orElseThrow(() -> new EntityNotFoundException("Nómina no encontrada con ID: " + nominaId));
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate ultimoDiaMesAnterior = hoy.withDayOfMonth(1).minusDays(1);
+        if (nomina.getFechaFinPeriodo().isBefore(ultimoDiaMesAnterior)) { // [cite: 88]
+            throw new IllegalArgumentException("No se pueden modificar líneas de nóminas de períodos ya cerrados.");
+        }
+
+        LineaNomina lineaAELiminar = nomina.getLineasNomina().stream()
+                .filter(ln -> ln.getId().equals(lineaNominaId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Línea de nómina no encontrada con ID: " + lineaNominaId + " en la nómina " + nominaId));
+
+        if ("Salario base".equalsIgnoreCase(lineaAELiminar.getConcepto().trim())) { // [cite: 143]
+            throw new IllegalArgumentException("La línea de 'Salario base' no puede ser eliminada.");
+        }
+
+        if (nomina.getLineasNomina().size() <= 1) { // [cite: 157]
+            throw new IllegalArgumentException("La nómina debe tener al menos una línea (el salario base). No se puede eliminar la última línea.");
+        }
+
+        nomina.removeLineaNomina(lineaAELiminar);
+        // Es importante que LineaNominaRepository se inyecte y se use explícitamente para borrar la línea si orphanRemoval no está funcionando como se espera,
+        // o si la línea no se desvincula correctamente de la colección antes de guardar la Nomina.
+        // Con orphanRemoval=true y la línea eliminada de la colección gestionada por JPA, JPA debería encargarse.
+        // Si da problemas, lineaNominaRepository.deleteById(lineaNominaId); y luego se guarda la nómina.
+
+        // Recalcular totales
+        BigDecimal totalDevengos = BigDecimal.ZERO;
+        BigDecimal totalDeducciones = BigDecimal.ZERO;
+        for (LineaNomina linea : nomina.getLineasNomina()) {
+            if (linea.getTipo() == LineaNomina.TipoLinea.DEVENGOS) {
+                totalDevengos = totalDevengos.add(linea.getCantidad());
+            } else {
+                totalDeducciones = totalDeducciones.add(linea.getCantidad().abs());
+            }
+        }
+        nomina.setTotalDevengos(totalDevengos);
+        nomina.setTotalDeducciones(totalDeducciones);
+        BigDecimal netoAPercibir = totalDevengos.subtract(totalDeducciones);
+        nomina.setNetoAPercibir(netoAPercibir);
+
+        if (netoAPercibir.compareTo(BigDecimal.ZERO) < 0) { // [cite: 156]
+            throw new IllegalArgumentException("El salario neto a percibir no puede ser negativo tras eliminar la línea.");
+        }
+
+        return nominaRepository.save(nomina); // Guarda la nómina con la línea eliminada y los totales recalculados
+    }
+
+    private NominaDetalleDTO convertToDetalleDto(Nomina nomina) {
+        if (nomina == null) return null;
+        NominaDetalleDTO dto = new NominaDetalleDTO();
+        dto.setId(nomina.getId().toString());
+        if (nomina.getEmpleado() != null) {
+            dto.setEmpleadoId(nomina.getEmpleado().getId().toString());
+            dto.setNombreCompletoEmpleado(nomina.getNombreCompletoEmpleado());
+            dto.setIdentificacionEmpleado(nomina.getIdentificacionEmpleado());
+            dto.setPuestoProfesionalEmpleado(nomina.getPuestoProfesionalEmpleado());
+            dto.setDepartamentoEmpleado(nomina.getDepartamentoEmpleado());
+            dto.setFechaAltaEmpleado(nomina.getFechaAltaEmpleado());
+        }
+        dto.setFechaInicioPeriodo(nomina.getFechaInicioPeriodo());
+        dto.setFechaFinPeriodo(nomina.getFechaFinPeriodo());
+        dto.setNombreEmpresa(nomina.getNombreEmpresa());
+        dto.setCifEmpresa(nomina.getCifEmpresa());
+        dto.setDireccionEmpresa(nomina.getDireccionEmpresa());
+        // Aquí también los campos opcionales si se mapearon en Nomina
+        // dto.setNumeroSeguridadSocialEmpleado(nomina.getNumeroSeguridadSocialEmpleadoSnapshot());
+        // dto.setDireccionEmpleadoPersonal(nomina.getDireccionEmpleadoSnapshot());
+
+
+        dto.setLineasNomina(nomina.getLineasNomina().stream()
+                .map(this::convertLineaToDto)
+                .collect(Collectors.toList()));
+
+        dto.setTotalDevengos(nomina.getTotalDevengos());
+        dto.setTotalDeducciones(nomina.getTotalDeducciones());
+        dto.setNetoAPercibir(nomina.getNetoAPercibir());
+
+        dto.setBrutoAcumuladoAnual(nomina.getBrutoAcumuladoAnual());
+        dto.setRetencionesAcumuladasAnual(nomina.getRetencionesAcumuladasAnual());
+        dto.setPercibidoAcumuladoAnual(nomina.getPercibidoAcumuladoAnual());
+
+        return dto;
+    }
+
+    private LineaNominaDTO convertLineaToDto(LineaNomina linea) {
+        if (linea == null) return null;
+        LineaNominaDTO dto = new LineaNominaDTO();
+        if (linea.getId() != null) {
+            dto.setId(linea.getId().toString());
+        }
+        dto.setConcepto(linea.getConcepto());
+        dto.setPorcentaje(linea.getPorcentaje());
+        dto.setCantidad(linea.getCantidad());
+        dto.setTipo(linea.getTipo());
+        return dto;
+    }
+}

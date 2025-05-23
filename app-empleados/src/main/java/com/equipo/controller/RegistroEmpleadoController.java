@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.io.IOException;
 import java.util.List;
 
+import static com.mysql.cj.conf.PropertyKey.logger;
+
 @Controller
 public class RegistroEmpleadoController {
 
@@ -159,6 +161,7 @@ public class RegistroEmpleadoController {
         RegistroEmpleadoPaso2DTO paso2DTO = (RegistroEmpleadoPaso2DTO) session.getAttribute("registroEmpleadoPaso2DTO");
         RegistroEmpleadoPaso3DTO paso3DTO = (RegistroEmpleadoPaso3DTO) session.getAttribute("registroEmpleadoPaso3DTO");
         RegistroEmpleadoPaso4DTO paso4DTO = (RegistroEmpleadoPaso4DTO) session.getAttribute("registroEmpleadoPaso4DTO");
+
 
         if(paso1DTO == null) {
             paso1DTO = new RegistroEmpleadoPaso1DTO();

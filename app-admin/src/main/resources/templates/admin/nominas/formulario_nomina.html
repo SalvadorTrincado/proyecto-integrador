@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${altaNominaDTO.empleadoId == null || nominaId == null ? 'Crear Nueva Nómina' : 'Modificar Nómina'}">Formulario Nómina</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/formulario_nomina.css}">
+</head>
+<body>
+
+<div class="container">
+    <h1 th:text="${altaNominaDTO.empleadoId == null || nominaId == null ? 'Crear Nueva Nómina' : 'Modificar Nómina para ' + empleadoNombre}">Formulario de Nómina</h1>
+
+    <div th:if="${param.error}" class="error-message"> <strong th:text="${param.error[0]}">Error</strong>
+    </div>
+    <div th:if="${errorGlobal}" class="error-message"> <strong th:text="${errorGlobal}"></strong>
+    </div>
+    <div th:if="${param.exito}" class="success-message"> <span th:text="${param.exito[0]}"></span>
+    </div>
+    <div th:if="${exito}" class="success-message"> <span th:text="${exito}"></span>
+    </div>
+    <div th:if="${error}" class="error-message">
+        <span th:text="${error}"></span>
+    </div>
+
+
+    <form th:object="${altaNominaDTO}"
+          th:action="${altaNominaDTO.empleadoId == null || nominaId == null ? '/admin/nominas/crear' : '/admin/nominas/modificar/' + nominaId}"
+          method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <fieldset>
+            <legend>Datos del Empleado y Período</legend>
+
+            <div class="form-group" th:if="${altaNominaDTO.empleadoId == null || nominaId == null}">
+                <label for="empleadoId">Empleado:</label>
+                <select id="empleadoId" th:field="*{empleadoId}" required>
+                    <option value="">-- Seleccione un Empleado --</option>
+                    <option th:each="emp : ${empleados}"
+                            th:value="${emp.id}"
+                            th:text="${emp.nombre + ' ' + emp.apellidos + ' (' + emp.documento + ')'}"></option>
+                </select>
+                <div th:if="${#fields.hasErrors('empleadoId')}" th:errors="*{empleadoId}" class="error-message"></div>
+            </div>
+            <div class="form-group" th:if="${altaNominaDTO.empleadoId != null && nominaId != null}">
+                <label>Empleado:</label>
+                <input type="text" th:value="${empleadoNombre}" readonly />
+                <input type="hidden" th:field="*{empleadoId}" />
+            </div>
+
+
+            <div class="form-group">
+                <label for="fechaInicioPeriodo">Fecha Inicio Período:</label>
+                <input type="date" id="fechaInicioPeriodo" th:field="*{fechaInicioPeriodo}" required/>
+                <div th:if="${#fields.hasErrors('fechaInicioPeriodo')}" th:errors="*{fechaInicioPeriodo}" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="fechaFinPeriodo">Fecha Fin Período:</label>
+                <input type="date" id="fechaFinPeriodo" th:field="*{fechaFinPeriodo}" required/>
+                <div th:if="${#fields.hasErrors('fechaFinPeriodo')}" th:errors="*{fechaFinPeriodo}" class="error-message"></div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Datos de la Empresa (Captura)</legend>
+            <div class="form-group">
+                <label for="nombreEmpresa">Nombre Empresa:</label>
+                <input type="text" id="nombreEmpresa" th:field="*{nombreEmpresa}" required/>
+                <div th:if="${#fields.hasErrors('nombreEmpresa')}" th:errors="*{nombreEmpresa}" class="error-message"></div>
+            </div>
+            <div class="form-group">
+                <label for="cifEmpresa">CIF Empresa:</label>
+                <input type="text" id="cifEmpresa" th:field="*{cifEmpresa}" required/>
+                <div th:if="${#fields.hasErrors('cifEmpresa')}" th:errors="*{cifEmpresa}" class="error-message"></div>
+            </div>
+            <div class="form-group">
+                <label for="direccionEmpresa">Dirección Empresa (Opcional):</label>
+                <input type="text" id="direccionEmpresa" th:field="*{direccionEmpresa}"/>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Líneas de Nómina</legend>
+            <div id="lineasNominaContainer">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Concepto</th>
+                        <th>Tipo</th>
+                        <th>Porcentaje (%)</th>
+                        <th>Importe (€)</th>
+                        <th>Acción</th>
+                    </tr>
+                    </thead>
+                    <tbody id="lineasNominaTbody">
+                    <tr th:if="${(altaNominaDTO.lineasNomina == null or altaNominaDTO.lineasNomina.empty) and (altaNominaDTO.empleadoId == null || nominaId == null)}">
+                        <td>
+                            <input type="text" name="lineasNomina[0].concepto" value="Salario base" readonly="readonly" required="required" />
+                        </td>
+                        <td>
+                            <select name="lineasNomina[0].tipo" required="required">
+                                <option value="DEVENGOS" selected="selected">DEVENGOS</option>
+                                <option value="DEDUCCIONES">DEDUCCIONES</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="lineasNomina[0].porcentaje" placeholder="Ej: 18.00" disabled="disabled" onchange="checkLineaFields(this, 0)"/>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" name="lineasNomina[0].cantidad" placeholder="Ej: 1500.00" required="required" onchange="checkLineaFields(this, 0)"/>
+                        </td>
+                        <td class="linea-nomina-actions">
+                            <button type="button" class="btn btn-danger" disabled="disabled">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr th:each="linea, iterStat : *{lineasNomina}" th:id="'linea-' + ${iterStat.index}">
+                        <td>
+                            <input type="hidden" th:field="*{lineasNomina[__${iterStat.index}__].id}" />
+                            <input type="text" th:field="*{lineasNomina[__${iterStat.index}__].concepto}" placeholder="Concepto" required="required"
+                                   th:attr="readonly=${linea.concepto != null && linea.concepto.equalsIgnoreCase('Salario base') ? 'readonly' : null}" />
+                            <div th:if="${#fields.hasErrors('lineasNomina[__${iterStat.index}__].concepto')}"
+                                 th:errors="*{lineasNomina[__${iterStat.index}__].concepto}" class="error-message"></div>
+                        </td>
+                        <td>
+                            <select th:field="*{lineasNomina[__${iterStat.index}__].tipo}" required="required">
+                                <option th:each="tipoOpt : ${T(com.equipo.entity.LineaNomina.TipoLinea).values()}"
+                                        th:value="${tipoOpt}" th:text="${tipoOpt.name()}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('lineasNomina[__${iterStat.index}__].tipo')}"
+                                 th:errors="*{lineasNomina[__${iterStat.index}__].tipo}" class="error-message"></div>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" th:field="*{lineasNomina[__${iterStat.index}__].porcentaje}" placeholder="Ej: 18.00"
+                                   th:attr="disabled=${linea.concepto != null && linea.concepto.equalsIgnoreCase('Salario base') ? 'disabled' : null}"
+                                   th:onchange="'checkLineaFields(this, ' + ${iterStat.index} + ')'"/>
+                            <div th:if="${#fields.hasErrors('lineasNomina[__${iterStat.index}__].porcentaje')}"
+                                 th:errors="*{lineasNomina[__${iterStat.index}__].porcentaje}" class="error-message"></div>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" th:field="*{lineasNomina[__${iterStat.index}__].cantidad}" placeholder="Ej: 1500.00" required="required"
+                                   th:onchange="'checkLineaFields(this, ' + ${iterStat.index} + ')'"/>
+                            <div th:if="${#fields.hasErrors('lineasNomina[__${iterStat.index}__].cantidad')}"
+                                 th:errors="*{lineasNomina[__${iterStat.index}__].cantidad}" class="error-message"></div>
+                        </td>
+                        <td class="linea-nomina-actions">
+                            <button type="button" class="btn btn-danger" onclick="removeLineaNomina(this)"
+                                    th:attr="disabled=${linea.concepto != null && linea.concepto.equalsIgnoreCase('Salario base') ? 'disabled' : null}">Eliminar</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${#fields.hasGlobalErrors()}" class="error-message">
+                <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            </div>
+            <div th:if="${#fields.hasErrors('lineasNomina') && !#fields.hasErrors('lineasNomina[0].*')}" th:errors="*{lineasNomina}" class="error-message"></div>
+
+
+            <button type="button" id="addLineaNominaBtn" class="btn btn-success" style="margin-top:10px;">Añadir Línea de Nómina</button>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" th:text="${altaNominaDTO.empleadoId == null || nominaId == null ? 'Crear Nómina' : 'Guardar Cambios'}">Guardar</button>
+            <a th:href="@{/admin/nominas/consultar}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var tiposDeLinea = /*[[${T(com.equipo.entity.LineaNomina.TipoLinea).values()}]]*/ [];
+    var lineaIndex = /*[[${altaNominaDTO.lineasNomina != null ? altaNominaDTO.lineasNomina.size() : 0}]]*/ 0;
+
+    // Ajustar el índice si la primera línea de "Salario base" se renderiza desde el HTML en modo creación
+    document.addEventListener('DOMContentLoaded', function () {
+        var tbody = document.getElementById('lineasNominaTbody');
+        if (tbody.rows.length > lineaIndex) { // Si Thymeleaf renderizó filas
+            lineaIndex = tbody.rows.length;
+        } else if (lineaIndex === 0 && (/*[[${altaNominaDTO.empleadoId == null || nominaId == null}]]*/ false) ) {
+            // No hacer nada aquí si la primera línea ya se renderizó con Thymeleaf
+        }
+
+
+        var addButton = document.getElementById('addLineaNominaBtn');
+        addButton.addEventListener('click', function () {
+            addLinea(false);
+        });
+    });
+
+    function addLinea(esSalarioBase) {
+        var container = document.getElementById('lineasNominaTbody');
+        var newRow = container.insertRow();
+        newRow.id = 'linea-' + lineaIndex;
+
+        var conceptoValue = esSalarioBase ? 'Salario base' : '';
+        var conceptoReadonly = esSalarioBase ? 'readonly="readonly"' : '';
+        var porcentajeDisabled = esSalarioBase ? 'disabled="disabled"' : '';
+        var cantidadRequired = 'required="required"'; // Cantidad siempre requerida inicialmente
+        var botonEliminarDisabled = esSalarioBase ? 'disabled="disabled"' : '';
+
+        newRow.innerHTML = `
+            <td>
+                <input type="text" name="lineasNomina[${lineaIndex}].concepto" value="${conceptoValue}" placeholder="Concepto" required ${conceptoReadonly} />
+            </td>
+            <td>
+                <select name="lineasNomina[${lineaIndex}].tipo" required>
+                    ${tiposDeLinea.map(tipo => `<option value="${tipo}" ${esSalarioBase && tipo === 'DEVENGOS' ? 'selected' : ''}>${tipo}</option>`).join('')}
+                </select>
+            </td>
+            <td>
+                <input type="number" step="0.01" name="lineasNomina[${lineaIndex}].porcentaje" placeholder="Ej: 18.00" ${porcentajeDisabled} onchange="checkLineaFields(this, ${lineaIndex})"/>
+            </td>
+            <td>
+                <input type="number" step="0.01" name="lineasNomina[${lineaIndex}].cantidad" placeholder="Ej: 1500.00" ${cantidadRequired} onchange="checkLineaFields(this, ${lineaIndex})"/>
+            </td>
+            <td class="linea-nomina-actions">
+                <button type="button" class="btn btn-danger" onclick="removeLineaNomina(this)" ${botonEliminarDisabled}>Eliminar</button>
+            </td>
+        `;
+        lineaIndex++;
+    }
+
+    function removeLineaNomina(button) {
+        var row = button.closest('tr');
+        var tbody = document.getElementById('lineasNominaTbody');
+
+        if (tbody.rows.length <= 1) {
+            alert('La nómina debe tener al menos una línea (Salario base).');
+            return;
+        }
+        // No permitir eliminar la fila de "Salario base" si es la única o está marcada como readonly
+        var conceptoInput = row.querySelector('input[name$=".concepto"]');
+        if (conceptoInput && conceptoInput.value.trim().toLowerCase() === 'salario base' && (conceptoInput.hasAttribute('readonly') || conceptoInput.readOnly)) {
+            alert('La línea de Salario Base no puede ser eliminada.');
+            return;
+        }
+        row.parentNode.removeChild(row);
+        // No es necesario re-indexar explícitamente aquí para Spring MVC, manejará los índices no contiguos.
+    }
+
+    function checkLineaFields(inputChanged, index) {
+        var row = inputChanged.closest('tr');
+        // Si no se encuentra la fila (puede pasar si se elimina y luego se intenta interactuar), salir.
+        if (!row) return;
+
+        var porcentajeInput = row.querySelector('input[name="lineasNomina[' + index + '].porcentaje"]');
+        var cantidadInput = row.querySelector('input[name="lineasNomina[' + index + '].cantidad"]');
+        var conceptoInput = row.querySelector('input[name="lineasNomina[' + index + '].concepto"]');
+
+        // Asegurar que los inputs existen antes de acceder a sus propiedades
+        if (!porcentajeInput || !cantidadInput || !conceptoInput) return;
+
+        if (conceptoInput.value.trim().toLowerCase() === 'salario base') {
+            porcentajeInput.value = '';
+            porcentajeInput.disabled = true;
+            cantidadInput.required = true;
+            return;
+        } else {
+            porcentajeInput.disabled = false;
+        }
+
+        if (inputChanged === porcentajeInput) { // Si se cambió el porcentaje
+            if (porcentajeInput.value.trim() !== '') {
+                // cantidadInput.value = ''; // Opcional: Limpiar cantidad si se introduce porcentaje
+                cantidadInput.required = false; // Cantidad no es requerida si hay porcentaje (se calculará)
+            } else { // Porcentaje está vacío
+                cantidadInput.required = true; // Cantidad vuelve a ser requerida
+            }
+        } else if (inputChanged === cantidadInput) { // Si se cambió la cantidad
+            if (cantidadInput.value.trim() !== '') {
+                // porcentajeInput.value = ''; // Opcional: Limpiar porcentaje si se introduce cantidad
+                // No se cambia el required de porcentaje, puede estar vacío
+            } else { // Cantidad está vacía
+                if (porcentajeInput.value.trim() === '') { // Y porcentaje también está vacío
+                    cantidadInput.required = true; // Se requiere cantidad (o porcentaje, validación del DTO)
+                }
+            }
+        }
+        // Asegurar que al menos uno (cantidad o porcentaje) sea potencialmente rellenable si no es salario base
+        if (conceptoInput.value.trim().toLowerCase() !== 'salario base') {
+            if (porcentajeInput.value.trim() === '' && cantidadInput.value.trim() === '') {
+                cantidadInput.required = true; // Por defecto, si ambos están vacíos, marcamos cantidad como requerida
+            }
+        }
+    }
+    /*]]>*/
+</script>
+
+</body>
+</html>
