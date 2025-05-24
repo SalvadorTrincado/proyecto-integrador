@@ -73,7 +73,7 @@
 
   <div class="admin-actions">
     <h3>Gestión de Productos</h3>
-    <a th:href="@{/admin/productos/carga}" class="action-button">Carga Masiva de Productos (CSV)</a>
+    <a th:href="@{/admin/productos}" class="action-button">Carga Masiva de Productos (CSV)</a>
   </div>
 
   <div class="admin-actions">
