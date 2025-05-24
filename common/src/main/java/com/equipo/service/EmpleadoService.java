@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 
 @Service
 public class EmpleadoService {
@@ -38,8 +40,6 @@ public class EmpleadoService {
 
         try {
             logger.info("Llamando a empleadoRepository.save() para empleado ID: {}", empleado.getId());
-            // Sin @GeneratedValue, save() con un ID asignado y que no existe en BD
-            // debería realizar un INSERT directamente (o un persist bajo el capó).
             Empleado empleadoGuardado = empleadoRepository.save(empleado);
             logger.info("Empleado guardado (después de save(), antes de commit de transacción) con ID: {}", empleadoGuardado.getId());
             return empleadoGuardado;
@@ -51,40 +51,58 @@ public class EmpleadoService {
 
     @Transactional
     public Empleado guardarOActualizarEmpleado(Empleado empleado) {
-        logger.info("Intentando guardar/actualizar empleado con ID: {}", empleado.getId());
-        // Si el ID es nulo y no hay @GeneratedValue, esto fallaría a menos que la BD tenga un default para el PK.
-        // Pero en nuestro caso, para Empleado, esperamos que el ID siempre venga asignado.
-        // Si app-admin usa esto para actualizar, estará bien. Si lo usa para crear, necesitará asignar ID.
+        logger.info("Servicio: Guardando o actualizando empleado con ID: {}", empleado.getId());
         Empleado empleadoGuardado = empleadoRepository.save(empleado);
-        logger.info("Empleado guardado/actualizado con ID: {}", empleadoGuardado.getId());
+        logger.info("Servicio: Empleado guardado/actualizado con ID: {}", empleadoGuardado.getId());
         return empleadoGuardado;
     }
 
     @Transactional(readOnly = true)
     public Optional<Empleado> obtenerEmpleadoPorId(UUID id) {
+        logger.debug("Servicio: Obteniendo empleado por ID: {}", id);
         return empleadoRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
     public List<Empleado> buscarEmpleadosPorParametros(String nombre, String departamento, Double salarioMinimo, Double salarioMaximo) {
-        return empleadoRepository.buscarPorParametros(nombre, departamento, salarioMinimo, salarioMaximo);
+        logger.info("Servicio: Llamando a Repositorio.buscarPorParametros: nombre='{}', departamento='{}', salarioMinimo={}, salarioMaximo={}",
+                nombre, departamento, salarioMinimo, salarioMaximo);
+        List<Empleado> resultados = empleadoRepository.buscarPorParametros(nombre, departamento, salarioMinimo, salarioMaximo);
+        logger.info("Servicio: Repositorio.buscarPorParametros devolvió {} empleados.", (resultados != null ? resultados.size() : "null"));
+        // if (resultados != null) {
+        //    logger.debug("IDs de empleados por parámetro: {}", resultados.stream().map(Empleado::getId).collect(Collectors.toList()));
+        // }
+        return resultados;
     }
 
     @Transactional(readOnly = true)
     public List<Empleado> obtenerTodosLosEmpleados() {
-        return empleadoRepository.findAll();
+        logger.info("Servicio: Llamando a Repositorio.findAll().");
+        List<Empleado> resultados = empleadoRepository.findAll();
+        logger.info("Servicio: Repositorio.findAll() devolvió {} empleados.", (resultados != null ? resultados.size() : "null"));
+        // if (resultados != null) {
+        //     logger.debug("IDs de todos los empleados: {}", resultados.stream().map(Empleado::getId).collect(Collectors.toList()));
+        // }
+        return resultados;
     }
 
     public List<Empleado> buscarYOrdenar(String filtro, String ordenarPor) {
+        logger.debug("Servicio: Buscando y ordenando empleados con filtro '{}' y orden '{}'", filtro, ordenarPor);
         List<Empleado> empleados = empleadoRepository.buscarEmpleadosPorNombreConteniendo(filtro);
 
         return empleados.stream()
                 .sorted((e1, e2) -> {
                     switch (ordenarPor) {
                         case "fechaIngreso":
+                            if (e1.getFechaIncorporacion() == null && e2.getFechaIncorporacion() == null) return 0;
+                            if (e1.getFechaIncorporacion() == null) return 1; // nulls al final
+                            if (e2.getFechaIncorporacion() == null) return -1; // nulls al final
                             return e1.getFechaIncorporacion().compareTo(e2.getFechaIncorporacion());
                         case "nombre":
                         default:
+                            if (e1.getNombre() == null && e2.getNombre() == null) return 0;
+                            if (e1.getNombre() == null) return 1;
+                            if (e2.getNombre() == null) return -1;
                             return e1.getNombre().compareToIgnoreCase(e2.getNombre());
                     }
                 })
@@ -108,8 +126,6 @@ public class EmpleadoService {
 
     @Transactional(readOnly = true)
     public List<Empleado> buscarEmpleadosPorEspecialidad(String especialidad) {
-        // La entidad ya no tiene el campo directo 'especialidades' si se quitó la prueba de aislamiento.
-        // Si se restauró 'especialidadesSeleccionadas', este método es correcto.
         return empleadoRepository.findByEspecialidadesSeleccionadasContaining(especialidad);
     }
 

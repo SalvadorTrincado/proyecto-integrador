@@ -1,5 +1,6 @@
 package com.equipo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference; // IMPORTANTE
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,13 +30,15 @@ public class Etiqueta {
     private String nombre;
 
     @ManyToMany(mappedBy = "etiquetas", fetch = FetchType.LAZY)
-    @ToString.Exclude // Evitar recursión en toString con Empleado
-    @EqualsAndHashCode.Exclude // Evitar recursión en equals/hashCode con Empleado
-    @Builder.Default // Asegura que Lombok Builder respete la inicialización de la colección
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @Builder.Default
+    @JsonBackReference // Lado "hijo", se omite para romper el ciclo de serialización
     private Set<Empleado> empleados = new HashSet<>();
 
     // Constructor adicional por si se necesita crear una etiqueta solo con el nombre
     public Etiqueta(String nombre) {
         this.nombre = nombre;
+        this.empleados = new HashSet<>(); // Asegurar inicialización
     }
 }
