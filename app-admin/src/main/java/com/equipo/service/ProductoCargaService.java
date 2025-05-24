@@ -2,6 +2,7 @@ package com.equipo.service;
 
 import com.equipo.dto.CatalogoProductoDTO;
 import com.equipo.dto.ProductoImportDTO;
+import com.equipo.dto.ProductoResponseDTO;
 import com.equipo.entity.Categoria;
 import com.equipo.entity.Producto;
 import com.equipo.entity.Proveedor;
@@ -11,6 +12,7 @@ import com.equipo.repository.ProveedorRepository;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -179,5 +181,76 @@ public class ProductoCargaService {
         }
         // producto.setFechaAlta se establece con @PrePersist [cite: 25]
         // producto.setValoracion por defecto es 0 [cite: 26]
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<ProductoResponseDTO> obtenerProductoDTOPorId(Long id) {
+        return productoRepository.findById(id)
+                .map(this::convertToProductoResponseDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Producto> obtenerProductoEntidadPorId(Long id) {
+        return productoRepository.findById(id);
+    }
+
+    @Transactional
+    public void eliminarProductoPorId(Long id) {
+        System.out.println("Servicio: Intentando eliminar producto con ID: " + id); // DEBUG
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> {
+                    System.err.println("Servicio: Producto no encontrado en BD con ID: " + id); // DEBUG
+                    return new EntityNotFoundException("Producto no encontrado con ID: " + id + " (verificado con findById). No se puede eliminar.");
+                });
+        System.out.println("Servicio: Producto encontrado, procediendo a eliminar: " + producto.getDescripcion()); // DEBUG
+        productoRepository.delete(producto);
+        System.out.println("Servicio: Producto con ID " + id + " eliminado (después de delete)."); // DEBUG
+    }
+
+    @Transactional
+    public void eliminarTodosLosProductos() {
+        // Similar al caso anterior, JPA maneja las tablas de join.
+        productoRepository.deleteAll();
+    }
+
+    private ProductoResponseDTO convertToProductoResponseDto(Producto producto) {
+        ProductoResponseDTO dto = new ProductoResponseDTO();
+        dto.setId(producto.getId());
+        dto.setDescripcion(producto.getDescripcion());
+        dto.setPrecio(producto.getPrecio());
+        dto.setMarca(producto.getMarca());
+        dto.setUnidades(producto.getUnidades());
+        dto.setFechaFabricacion(producto.getFechaFabricacion());
+        dto.setFechaAlta(producto.getFechaAlta());
+        dto.setValoracion(producto.getValoracion());
+        dto.setEsPerecedero(producto.getEsPerecedero());
+
+        if (producto.getProveedor() != null) {
+            dto.setProveedorId(producto.getProveedor().getId());
+            dto.setProveedorNombre(producto.getProveedor().getNombre());
+        }
+
+        if (producto.getCategorias() != null && !producto.getCategorias().isEmpty()) {
+            dto.setNombresCategorias(producto.getCategorias().stream()
+                    .map(Categoria::getNombre)
+                    .collect(Collectors.toSet()));
+        }
+
+        dto.setTitulo(producto.getTitulo());
+        dto.setAutor(producto.getAutor());
+        dto.setEditorial(producto.getEditorial());
+        dto.setTapa(producto.getTapa());
+        dto.setNumeroPaginas(producto.getNumeroPaginas());
+        dto.setSegundaMano(producto.getSegundaMano());
+        dto.setDimensionAncho(producto.getDimensionAncho());
+        dto.setDimensionProfundo(producto.getDimensionProfundo());
+        dto.setDimensionAlto(producto.getDimensionAlto());
+        if (producto.getColores() != null) {
+            dto.setColores(producto.getColores());
+        }
+        dto.setTalla(producto.getTalla());
+        dto.setMaterial(producto.getMaterial());
+
+        return dto;
     }
 }

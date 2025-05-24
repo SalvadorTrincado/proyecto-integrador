@@ -1,5 +1,6 @@
 package com.equipo.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,5 +30,6 @@ public class Proveedor {
     @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonManagedReference // Indica que este es el lado "padre" y debe ser serializado normalmente.
     private List<Producto> productos = new ArrayList<>();
 }
