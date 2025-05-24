@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Modificar Mis Datos Personales</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/modificar_datos_empleado.css}">
+</head>
+<body>
+<header>
+    <h1>Proyecto Integrador - Portal del Empleado</h1>
+</header>
+
+<main>
+    <h1>Modificar Mis Datos Personales y de Contacto</h1>
+
+    <div th:if="${errorGlobal}" class="message-global error-message-global" th:text="${errorGlobal}"></div>
+    <div th:if="${param.errorGlobal}" class="message-global error-message-global" th:text="${param.errorGlobal[0]}"></div>
+    <form th:action="@{/empleado/modificar-datos}" th:object="${modificacionEmpleadoDTO}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+
+        <div class="form-section">
+            <h2>Datos Personales</h2>
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" th:field="*{nombre}" class="form-control">
+                <p th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="apellidos">Apellidos:</label>
+                <input type="text" id="apellidos" th:field="*{apellidos}" class="form-control">
+                <p th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="fotografia">Fotografía (dejar en blanco para no cambiar):</label>
+                <input type="file" id="fotografia" name="fotografia" accept=".jpg,.jpeg,.png,.gif" class="form-control">
+                <p th:if="${#fields.hasErrors('fotografia')}" th:errors="*{fotografia}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label>Género:</label><br/>
+                <input type="radio" th:field="*{generoSeleccionado}" value="Femenino" id="generoF">
+                <label for="generoF" class="radio-label">Femenino</label>
+                <input type="radio" th:field="*{generoSeleccionado}" value="Masculino" id="generoM">
+                <label for="generoM" class="radio-label">Masculino</label>
+                <input type="radio" th:field="*{generoSeleccionado}" value="Otro" id="generoO">
+                <label for="generoO" class="radio-label">Otro</label>
+                <p th:if="${#fields.hasErrors('generoSeleccionado')}" th:errors="*{generoSeleccionado}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+                <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}" class="form-control">
+                <p th:if="${#fields.hasErrors('fechaNacimiento')}" th:errors="*{fechaNacimiento}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="edad">Edad:</label>
+                <input type="number" id="edad" th:field="*{edad}" class="form-control">
+                <p th:if="${#fields.hasErrors('edad')}" th:errors="*{edad}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="paisNacimiento">País de Nacimiento:</label>
+                <input type="text" id="paisNacimiento" th:field="*{paisNacimiento}" class="form-control">
+                <p th:if="${#fields.hasErrors('paisNacimiento')}" th:errors="*{paisNacimiento}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="comentarios">Comentarios:</label>
+                <textarea id="comentarios" th:field="*{comentarios}" rows="3" class="form-control"></textarea>
+                <p th:if="${#fields.hasErrors('comentarios')}" th:errors="*{comentarios}" class="error"></p>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Datos de Contacto</h2>
+            <div class="form-group">
+                <label for="tipoDocumento">Tipo de Documento:</label>
+                <input type="text" id="tipoDocumento" th:field="*{tipoDocumento}" readonly="readonly" class="form-control" title="El tipo de documento no se puede modificar.">
+                <p th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="documento">Número de Documento:</label>
+                <input type="text" id="documento" th:field="*{documento}" readonly="readonly" class="form-control" title="El número de documento no se puede modificar.">
+                <p th:if="${#fields.hasErrors('documento')}" th:errors="*{documento}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="prefijoTelefono">Prefijo Telefónico:</label>
+                <select id="prefijoTelefono" th:field="*{prefijoTelefono}" class="form-control">
+                    <option value="">-- Selecciona prefijo --</option>
+                    <option value="+34" th:selected="${modificacionEmpleadoDTO.prefijoTelefono == '+34'}">+34 (España)</option>
+                    <option value="+33" th:selected="${modificacionEmpleadoDTO.prefijoTelefono == '+33'}">+33 (Francia)</option>
+                    <option value="+49" th:selected="${modificacionEmpleadoDTO.prefijoTelefono == '+49'}">+49 (Alemania)</option>
+                    <option value="+52" th:selected="${modificacionEmpleadoDTO.prefijoTelefono == '+52'}">+52 (México)</option>
+                    <option value="+54" th:selected="${modificacionEmpleadoDTO.prefijoTelefono == '+54'}">+54 (Argentina)</option>
+                </select>
+                <p th:if="${#fields.hasErrors('prefijoTelefono')}" th:errors="*{prefijoTelefono}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="telefonoMovil">Teléfono Móvil:</label>
+                <input type="text" id="telefonoMovil" th:field="*{telefonoMovil}" class="form-control">
+                <p th:if="${#fields.hasErrors('telefonoMovil')}" th:errors="*{telefonoMovil}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="tipoViaDireccionPpal">Tipo de Vía:</label>
+                <select id="tipoViaDireccionPpal" th:field="*{tipoViaDireccionPpal}" class="form-control">
+                    <option value="">-- Selecciona tipo --</option>
+                    <option value="Calle" th:selected="${modificacionEmpleadoDTO.tipoViaDireccionPpal == 'Calle'}">Calle</option>
+                    <option value="Avenida" th:selected="${modificacionEmpleadoDTO.tipoViaDireccionPpal == 'Avenida'}">Avenida</option>
+                    <option value="Paseo" th:selected="${modificacionEmpleadoDTO.tipoViaDireccionPpal == 'Paseo'}">Paseo</option>
+                    <option value="Plaza" th:selected="${modificacionEmpleadoDTO.tipoViaDireccionPpal == 'Plaza'}">Plaza</option>
+                    <option value="Carretera" th:selected="${modificacionEmpleadoDTO.tipoViaDireccionPpal == 'Carretera'}">Carretera</option>
+                </select>
+                <p th:if="${#fields.hasErrors('tipoViaDireccionPpal')}" th:errors="*{tipoViaDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="nombreViaDireccionPpal">Nombre de Vía:</label>
+                <input type="text" id="nombreViaDireccionPpal" th:field="*{nombreViaDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('nombreViaDireccionPpal')}" th:errors="*{nombreViaDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="numeroViaDireccionPpal">Número:</label>
+                <input type="text" id="numeroViaDireccionPpal" th:field="*{numeroViaDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('numeroViaDireccionPpal')}" th:errors="*{numeroViaDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="portalDireccionPpal">Portal (Opcional):</label>
+                <input type="text" id="portalDireccionPpal" th:field="*{portalDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('portalDireccionPpal')}" th:errors="*{portalDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="plantaDireccionPpal">Planta (Opcional):</label>
+                <input type="text" id="plantaDireccionPpal" th:field="*{plantaDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('plantaDireccionPpal')}" th:errors="*{plantaDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="puertaDireccionPpal">Puerta (Opcional):</label>
+                <input type="text" id="puertaDireccionPpal" th:field="*{puertaDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('puertaDireccionPpal')}" th:errors="*{puertaDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="localidadDireccionPpal">Localidad:</label>
+                <input type="text" id="localidadDireccionPpal" th:field="*{localidadDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('localidadDireccionPpal')}" th:errors="*{localidadDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="regionDireccionPpal">Región/Comunidad/Provincia:</label>
+                <input type="text" id="regionDireccionPpal" th:field="*{regionDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('regionDireccionPpal')}" th:errors="*{regionDireccionPpal}" class="error"></p>
+            </div>
+            <div class="form-group">
+                <label for="codigoPostalDireccionPpal">Código Postal:</label>
+                <input type="text" id="codigoPostalDireccionPpal" th:field="*{codigoPostalDireccionPpal}" class="form-control">
+                <p th:if="${#fields.hasErrors('codigoPostalDireccionPpal')}" th:errors="*{codigoPostalDireccionPpal}" class="error"></p>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <a th:href="@{/aplicacion_corporativa/area_personal}" class="btn">Cancelar</a>
+            <button type="submit">Guardar Cambios</button>
+        </div>
+    </form>
+</main>
+
+<footer>
+    <p>© 2025 Tu Nombre o Empresa</p>
+</footer>
+
+</body>
+</html>

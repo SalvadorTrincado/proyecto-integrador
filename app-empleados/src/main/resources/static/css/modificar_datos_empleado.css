@@ -1,0 +1,244 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f1de; /* Tono crema suave */
+    color: #5e503f; /* Marrón tierra suave */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+header {
+    width: 100%;
+    background-color: #3a5a40; /* Verde bosque oscuro */
+    color: white;
+    padding: 18px 0;
+    text-align: center;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.8em;
+    font-weight: normal;
+}
+
+main {
+    width: 100%;
+    max-width: 850px; /* Un poco más ancho para formularios largos */
+    margin: 0 auto 30px auto;
+    padding: 30px 35px;
+    background-color: #ffffff; /* Fondo blanco para el contenido */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+main > h1 { /* Título principal dentro de main */
+    color: #a3b18a; /* Verde musgo claro */
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.2em;
+    font-weight: bold;
+}
+
+.form-section {
+    margin-bottom: 35px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #e8e5d1; /* Separador más suave */
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.form-section h2 {
+    color: #3a5a40; /* Verde bosque oscuro */
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 1.6em;
+    border-bottom: 2px solid #a3b18a; /* Verde musgo claro */
+    padding-bottom: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px; /* Aumenta el espacio entre grupos */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px; /* Más espacio debajo de la etiqueta */
+    color: #588157; /* Verde medio */
+    font-weight: bold;
+    font-size: 1.05em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group input[type="file"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px 15px; /* Más padding interno */
+    border: 1px solid #a3b18a; /* Borde verde musgo claro */
+    border-radius: 6px; /* Bordes más redondeados */
+    box-sizing: border-box;
+    font-size: 1em;
+    color: #5e503f;
+    background-color: #fdfdfd; /* Fondo de input ligeramente diferente */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="file"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #588157; /* Verde medio al enfocar */
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(88, 129, 87, 0.3); /* Sombra sutil verde */
+}
+
+.form-group input[readonly] {
+    background-color: #e9ecef; /* Gris claro para campos readonly */
+    cursor: not-allowed;
+    color: #6c757d; /* Texto gris oscuro */
+    border-color: #ced4da; /* Borde gris más claro */
+}
+
+.form-group input[type="radio"],
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.form-group label.radio-label,
+.form-group label.checkbox-label {
+    font-weight: normal;
+    display: inline;
+    margin-right: 20px;
+    color: #5e503f; /* Color de texto para etiquetas de radio/checkbox */
+    font-size: 1em;
+}
+
+.error {
+    color: #d9534f; /* Rojo para errores */
+    font-size: 0.9em; /* Un poco más grande */
+    margin-top: 5px;
+    display: block;
+    font-style: italic;
+}
+
+.button-group {
+    margin-top: 35px;
+    text-align: right;
+    padding-top: 25px;
+    border-top: 1px solid #e8e5d1; /* Separador suave */
+}
+
+.button-group button,
+.button-group a.btn { /* Aplicar estilos también a los enlaces que actúan como botones */
+    padding: 12px 25px;
+    margin-left: 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 1.05em;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    display: inline-block; /* Para que <a> se comporte como botón */
+    line-height: normal; /* Mejor alineación vertical del texto en <a> */
+}
+
+.button-group button[type="submit"] {
+    background-color: #588157; /* Verde medio */
+    color: white;
+}
+
+.button-group button[type="submit"]:hover {
+    background-color: #3a5a40; /* Verde bosque oscuro */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.button-group a.btn { /* Estilo específico para el enlace "Cancelar" */
+    background-color: #6c757d; /* Gris oscuro */
+    color: white;
+}
+
+.button-group a.btn:hover {
+    background-color: #545b62; /* Gris más oscuro */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.message-global {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.95em;
+}
+
+.success-message-global {
+    color: #155724; /* Verde oscuro para éxito */
+    background-color: #d4edda; /* Fondo verde pálido */
+    border: 1px solid #c3e6cb; /* Borde verde más pálido */
+}
+
+.error-message-global {
+    color: #721c24; /* Rojo oscuro para error */
+    background-color: #f8d7da; /* Fondo rojo pálido */
+    border: 1px solid #f5c6cb; /* Borde rojo más pálido */
+}
+
+footer {
+    width: 100%;
+    text-align: center;
+    padding: 25px 0;
+    margin-top: 30px;
+    background-color: #dad7cd; /* Gris claro, como el formulario original */
+    color: #5e503f;
+    border-top: 1px solid #a3b18a; /* Borde verde musgo */
+    font-size: 0.9em;
+}
+
+/* Media Query para pantallas más pequeñas */
+@media (max-width: 768px) {
+    main {
+        margin: 20px 15px;
+        padding: 20px;
+    }
+    main > h1 {
+        font-size: 1.8em;
+    }
+    .form-section h2 {
+        font-size: 1.3em;
+    }
+    .button-group {
+        text-align: center;
+    }
+    .button-group button,
+    .button-group a.btn {
+        margin-left: 5px;
+        margin-right: 5px;
+        margin-bottom: 10px; /* Apilar botones en móviles */
+        display: block; /* Hacer que ocupen todo el ancho disponible */
+        width: calc(100% - 10px); /* Ajustar el ancho */
+    }
+    .button-group a.btn:first-child, .button-group button:first-child {
+        margin-left: 5px; /* Quitar margen izquierdo al primer botón en móvil */
+    }
+}

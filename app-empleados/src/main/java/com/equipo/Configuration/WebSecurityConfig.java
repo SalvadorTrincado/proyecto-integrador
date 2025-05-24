@@ -50,7 +50,7 @@ public class WebSecurityConfig {
 
             SavedRequestAwareAuthenticationSuccessHandler handler = new SavedRequestAwareAuthenticationSuccessHandler();
             handler.setDefaultTargetUrl("/aplicacion_corporativa/area_personal");
-            handler.setAlwaysUseDefaultTargetUrl(true); // Esta línea debería funcionar ahora
+            handler.setAlwaysUseDefaultTargetUrl(true);
             handler.onAuthenticationSuccess(request, response, authentication);
         };
     }
@@ -65,85 +65,65 @@ public class WebSecurityConfig {
                 String failureUrlKey = "credenciales";
 
                 if (email != null && !email.isEmpty()) {
-                    // Solo registrar el intento fallido si la causa no es que la cuenta ya estaba bloqueada.
-                    // La LockedException la lanza el UserDetailsService (AutenticacionService) si la cuenta ya está marcada como bloqueada.
                     if (!(exception instanceof LockedException)) {
                         autenticacionService.registrarIntentoFallido(email);
                     }
                 }
 
-                // Si la excepción es LockedException (porque UserDetailsService la lanzó),
-                // o si después de registrar el intento fallido la cuenta AHORA está bloqueada.
-                // Para ser más precisos, el UserDetailsService lanza LockedException si ya está bloqueada.
-                // El failureHandler registra el intento Y PUEDE bloquearla.
-                // Necesitamos que el redirect refleje el estado DESPUÉS de registrarIntentoFallido.
-                // Una forma es que registrarIntentoFallido devuelva si la cuenta quedó bloqueada.
-                // O, más simple aquí, si la excepción original es LockedException, ya estaba bloqueada.
-                // Si no, es un fallo de credenciales, y registrarIntentoFallido se encargará de bloquearla si llega al límite.
-
                 if (exception instanceof LockedException) {
                     failureUrlKey = "bloqueado";
-                } else {
-                    // Comprobamos si el intento actual de fallo ha causado un bloqueo
-                    // Esto requeriría que AutenticacionService.usuarioExiste y AutenticacionService.loadUserByUsername (o una nueva función)
-                    // nos devuelva el estado actual de bloqueo del usuario.
-                    // Por ahora, si no es LockedException, asumimos fallo de credenciales.
-                    // El propio AutenticacionService.registrarIntentoFallido ya loguea si bloquea.
                 }
 
-                // Para que el mensaje de "cuenta bloqueada" se muestre inmediatamente después del 3er fallo,
-                // el failureHandler necesita saber si el último intento CAUSÓ el bloqueo.
-                // Una forma es modificar registrarIntentoFallido para que devuelva un boolean.
-                // O, si la excepción no es LockedException, se asume error de credenciales, y si ese error
-                // lleva al bloqueo, el *siguiente* intento de login con ese usuario (en loadUserByUsername)
-                // lanzará LockedException.
-
-                // Simplificación: si la excepción que llega aquí es LockedException, la cuenta ESTABA bloqueada.
-                // Si no, fue un fallo de credenciales.
-                // El AutenticacionController se encarga de mostrar el mensaje correcto basado en el parámetro "error"
-                response.sendRedirect(request.getContextPath() + "/autenticacion/paso2?error=" + failureUrlKey);
+                response.sendRedirect(request.getContextPath() + "/autenticacion/paso2?email=" + (email != null ? email : "") + "&error=" + failureUrlKey);
             }
         };
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   AuthenticationSuccessHandler successHandler, // Inyectamos los beans de handler
+                                                   AuthenticationSuccessHandler successHandler,
                                                    AuthenticationFailureHandler failureHandler) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
-                                "/css/**", "/js/**", "/h2-console/**",
-                                "/autenticacion/paso1", "/autenticacion/paso1-post", "/autenticacion/paso2",
+                                "/css/**", "/js/**", "/h2-console/**", // Recursos estáticos y consola H2
+                                "/autenticacion/paso1", "/autenticacion/paso1-post",
+                                "/autenticacion/paso2", // Permitir GET a paso2 para mostrar errores
                                 "/registrar_usuario", "/registrar_usuario_post",
-                                "/recuperar_password", "/forgot-password"
+                                "/recuperar_password", "/forgot-password" // Funcionalidades de recuperación y registro
                         ).permitAll()
                         .requestMatchers(
-                                "/aplicacion_corporativa/registro/**", "/resumen/exito", "/resumen/exito-post",
-                                "/aplicacion_corporativa/area_personal", "/empleado/nominas/**"
-                        ).authenticated()
-                        .anyRequest().permitAll()
+                                "/aplicacion_corporativa/registro/**", // Pasos del registro de empleado
+                                "/resumen/exito", "/resumen/exito-post", // Resumen y finalización del registro
+                                "/aplicacion_corporativa/area_personal", // Área personal del empleado
+                                "/empleado/nominas/**", // Acceso a las nóminas del empleado
+                                "/empleado/modificar-datos" // NUEVA RUTA para modificar datos del empleado
+                        ).authenticated() // Requieren autenticación
+                        .anyRequest().permitAll() // Por defecto, permite otras rutas no especificadas (ajustar si es necesario a .authenticated())
                 )
                 .formLogin((form) -> form
-                        .loginPage("/autenticacion/paso1")
-                        .loginProcessingUrl("/autenticacion/paso2-post")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .successHandler(successHandler) // Usamos el successHandler personalizado
-                        .failureHandler(failureHandler) // Usamos el failureHandler personalizado
-                        // .defaultSuccessUrl("/aplicacion_corporativa/area_personal", true) // El successHandler se encarga de la redirección
+                        .loginPage("/autenticacion/paso1") // Página de inicio de sesión (Paso 1)
+                        .loginProcessingUrl("/autenticacion/paso2-post") // URL donde se procesa el login (Paso 2)
+                        .usernameParameter("email") // Nombre del parámetro para el email en el form
+                        .passwordParameter("password") // Nombre del parámetro para la contraseña
+                        .successHandler(successHandler) // Manejador para login exitoso
+                        .failureHandler(failureHandler) // Manejador para login fallido
                         .permitAll()
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/autenticacion/paso1?logout")
+                        .logoutSuccessUrl("/autenticacion/paso1?logout") // Redirigir a paso1 con mensaje de logout
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
-                .csrf((csrf) -> csrf.disable())
+                .csrf((csrf) -> csrf
+                                .ignoringRequestMatchers("/h2-console/**") // Deshabilitar CSRF para H2 console
+                        // Si tienes problemas con POST en otros formularios y no manejas tokens CSRF, podrías añadir .disable() temporalmente
+                        // .disable() // DESCOMENTAR SÓLO PARA PRUEBAS SI ES ESTRICTAMENTE NECESARIO
+                )
                 .headers((headers) -> headers
-                        .frameOptions((frameOptions) -> frameOptions.sameOrigin())
+                        .frameOptions((frameOptions) -> frameOptions.sameOrigin()) // Necesario para H2 console
                 );
 
         return http.build();
