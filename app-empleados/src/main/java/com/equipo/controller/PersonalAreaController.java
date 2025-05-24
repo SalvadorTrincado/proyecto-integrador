@@ -1,13 +1,11 @@
 package com.equipo.controller;
 
 import com.equipo.entity.Empleado;
-import com.equipo.entity.Etiqueta; // Importar Etiqueta
+import com.equipo.entity.Etiqueta;
 import com.equipo.entity.Usuario;
+import com.equipo.service.AutenticacionService;
 import com.equipo.service.EmpleadoService;
 import com.equipo.service.UsuarioService;
-// Asumiremos que existe un EtiquetaService accesible o que parte de su lógica está en EmpleadoService
-// Si EtiquetaService está en app-admin y no es accesible directamente, necesitaremos una forma de obtener las etiquetas.
-// Por ahora, asumiré que Empleado entidad ya tiene la colección de etiquetas cargada (LAZY o EAGER).
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.servlet.http.HttpSession;
 
-import java.util.Collections; // Para set vacío
+import java.util.Collections;
 import java.util.Optional;
-import java.util.Set; // Importar Set
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,13 +29,13 @@ public class PersonalAreaController {
     private static final Logger logger = LoggerFactory.getLogger(PersonalAreaController.class);
     private final EmpleadoService empleadoService;
     private final UsuarioService usuarioService;
-    // No inyectamos EtiquetaService directamente aquí para mantener app-empleados más desacoplado de la gestión activa de etiquetas.
-    // Las etiquetas se obtendrán a través de la entidad Empleado.
+    private final AutenticacionService autenticacionService;
 
     @Autowired
-    public PersonalAreaController(EmpleadoService empleadoService, UsuarioService usuarioService) {
+    public PersonalAreaController(EmpleadoService empleadoService, UsuarioService usuarioService, AutenticacionService autenticacionService) {
         this.empleadoService = empleadoService;
         this.usuarioService = usuarioService;
+        this.autenticacionService = autenticacionService;
     }
 
     @GetMapping("/aplicacion_corporativa/area_personal")
@@ -67,11 +65,28 @@ public class PersonalAreaController {
 
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
-            UUID usuarioId = usuario.getId();
-            model.addAttribute("usuarioId", usuarioId);
-            session.setAttribute("usuarioAutenticadoId", usuarioId);
+            // El contador de conexiones válidas (6d) se actualiza en AutenticacionService tras un login exitoso.
+            // Aquí, obtenemos el usuario directamente de la BD para tener el valor más reciente.
+            Usuario usuarioActualizadoConContadores = usuarioService.obtenerUsuarioPorEmail(userEmail)
+                    .orElse(usuario); // Fallback por si acaso
 
-            Optional<Empleado> empleadoOpt = empleadoService.obtenerEmpleadoPorId(usuarioId);
+            model.addAttribute("usuario", usuarioActualizadoConContadores);
+
+            // Tarea 6e: Contador de conexiones HTTP (por sesión)
+            Integer contadorHttp = (Integer) session.getAttribute("contadorConexionesHttp");
+            if (contadorHttp == null) {
+                contadorHttp = 0;
+            }
+            contadorHttp++;
+            session.setAttribute("contadorConexionesHttp", contadorHttp);
+            model.addAttribute("contadorConexionesHttp", contadorHttp);
+            logger.info("Contador de conexiones HTTP para la sesión del usuario {}: {}", userEmail, contadorHttp);
+
+            // Guardar el ID de usuario en sesión para el flujo de registro de empleado
+            session.setAttribute("usuarioAutenticadoId", usuarioActualizadoConContadores.getId());
+
+
+            Optional<Empleado> empleadoOpt = empleadoService.obtenerEmpleadoPorId(usuarioActualizadoConContadores.getId());
             boolean esEmpleado = empleadoOpt.isPresent();
             model.addAttribute("esEmpleado", esEmpleado);
 
@@ -80,9 +95,6 @@ public class PersonalAreaController {
                 String nombreCompleto = empleado.getNombre() + " " + empleado.getApellidos();
                 model.addAttribute("nombreCompletoEmpleado", nombreCompleto);
 
-                // Obtener y pasar las etiquetas del empleado a la vista
-                // Asegurarse de que la colección de etiquetas se inicialice si es LAZY y se accede aquí.
-                // Hibernate manejará esto si la sesión está activa.
                 Set<String> nombresEtiquetas = empleado.getEtiquetas().stream()
                         .map(Etiqueta::getNombre)
                         .collect(Collectors.toSet());
@@ -91,7 +103,7 @@ public class PersonalAreaController {
 
             } else {
                 model.addAttribute("mensajeOpcionRegistro", "Aún no has completado tu perfil de empleado.");
-                model.addAttribute("etiquetasDelEmpleado", Collections.emptySet()); // Para que el atributo exista en la vista
+                model.addAttribute("etiquetasDelEmpleado", Collections.emptySet());
                 logger.info("Usuario {} NO es un empleado. Mostrando opción para completar registro.", userEmail);
             }
         } else {

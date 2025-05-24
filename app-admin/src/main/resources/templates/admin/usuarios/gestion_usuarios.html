@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/css/lista_nominas.css}"> <style>
+  .actions form button {
+    margin-left: 5px;
+  }
+  .table-container {
+    overflow-x: auto; /* Para tablas anchas en pantallas pequeñas */
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Gestión de Usuarios del Sistema</h1>
+
+  <div th:if="${mensajeExitoGlobal}" class="alert alert-success" th:text="${mensajeExitoGlobal}"></div>
+  <div th:if="${errorGlobal}" class="alert alert-danger" th:text="${errorGlobal}"></div>
+  <div th:if="${mensajeInfoGlobal}" class="alert alert-info" th:text="${mensajeInfoGlobal}"></div>
+
+  <div th:if="${usuarios != null && !usuarios.isEmpty()}" class="table-container">
+    <table>
+      <thead>
+      <tr>
+        <th>ID Usuario (corto)</th>
+        <th>Email</th>
+        <th>Bloqueada</th>
+        <th>Intentos Fallidos</th>
+        <th>Fecha Bloqueo</th>
+        <th>Conexiones Válidas</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="usuario : ${usuarios}">
+        <td th:text="${usuario.id != null ? #strings.substring(usuario.id.toString(), 0, 8) + '...' : 'N/A'}"></td>
+        <td th:text="${usuario.email}"></td>
+        <td>
+          <span th:if="${usuario.cuentaBloqueada}" style="color:red; font-weight:bold;">SÍ</span>
+          <span th:unless="${usuario.cuentaBloqueada}" style="color:green;">NO</span>
+        </td>
+        <td th:text="${usuario.intentosFallidos}"></td>
+        <td th:text="${usuario.fechaBloqueo != null ? #temporals.format(usuario.fechaBloqueo, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+        <td th:text="${usuario.contadorConexionesValidas != null ? usuario.contadorConexionesValidas : 0}"></td>
+        <td class="actions">
+          <a th:href="@{/admin/usuarios/detalle-usuario/{id}(id=${usuario.id})}" class="btn btn-info btn-sm">Detalle</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div th:if="${usuarios == null || usuarios.isEmpty()}" class="no-results">
+    <p>No se encontraron usuarios en el sistema.</p>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <a th:href="@{/admin/area_personal}" class="btn btn-secondary">Volver al Área Personal</a>
+  </div>
+</div>
+</body>
+</html>

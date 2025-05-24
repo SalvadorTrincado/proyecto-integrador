@@ -36,13 +36,13 @@
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
         }
-        .etiquetas-list {
+        .etiquetas-list, .user-stats {
             margin-top: 15px;
             padding: 10px;
             background-color: #e9ecef;
             border-radius: 5px;
         }
-        .etiquetas-list h3 {
+        .etiquetas-list h3, .user-stats h3 {
             margin-top: 0;
             margin-bottom: 10px;
             color: #3a5a40;
@@ -61,6 +61,11 @@
             margin-bottom: 5px;
             font-size: 0.9em;
         }
+        .user-stats p {
+            margin: 5px 0;
+            color: #5e503f;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -70,8 +75,14 @@
 <h1 th:if="${esEmpleado == true}">Bienvenido/a, <span th:text="${nombreCompletoEmpleado}"></span>!</h1>
 <h1 th:if="${esEmpleado == false}">Bienvenido a tu Área Personal</h1>
 
-<p th:if="${usuarioId != null}">Tu ID de usuario es: <span th:text="${usuarioId}"></span></p>
-<p>Email: <span sec:authentication="name"></span></p>
+<p th:if="${usuario != null && usuario.email != null}">Email: <span th:text="${usuario.email}"></span></p>
+
+<div th:if="${usuario != null}" class="user-stats">
+    <h3>Mis Estadísticas de Conexión</h3>
+    <p>Total de conexiones válidas (general): <strong th:text="${usuario.contadorConexionesValidas != null ? usuario.contadorConexionesValidas : 0}">0</strong></p>
+    <p>Total de conexiones HTTP (esta sesión): <strong th:text="${contadorConexionesHttp != null ? contadorConexionesHttp : 0}">0</strong></p>
+</div>
+
 
 <div th:if="${esEmpleado == false}" class="registration-prompt">
     <p th:if="${mensajeOpcionRegistro}" th:text="${mensajeOpcionRegistro}"></p>
