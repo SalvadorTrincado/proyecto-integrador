@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin/productos")
 public class CargaMasivaProductosController {
 
-    @GetMapping
+    @GetMapping("/carga")
     public String mostrarFormularioCarga() {
         return "aplicacion_corporativa/productos/carga_masiva_productos";
     }

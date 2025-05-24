@@ -1,6 +1,6 @@
 #FileLock
-#Sat May 24 11:12:56 CEST 2025
-server=26.97.131.112\:62486
-hostName=DESKTOP-8HASCG6
+#Sat May 24 12:05:32 CEST 2025
+server=192.168.100.173\:53572
+hostName=host.docker.internal
 method=file
-id=1970190f81ddb13e82fdc9cbc7ff0fec748c3668971
+id=19701c1413d057e3746ee479a0bf12474936b587be6
