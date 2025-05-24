@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión Dinámica de Productos</title>
+    <meta name="csrf-token" th:content="${_csrf?.token}"/>
+    <meta name="csrf-header" th:content="${_csrf?.headerName}"/>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #0056b3; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .section { margin-bottom: 30px; padding: 15px; background-color: #f9f9f9; border: 1px solid #eee; border-radius: 5px;}
+        .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input[type="text"], .form-group input[type="file"], .form-group select {
+            width: calc(100% - 22px); padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+        }
+        .form-inline .form-group { display: inline-block; margin-right: 10px; min-width: 200px; vertical-align: bottom;}
+        .form-inline .form-group label { display: block; }
+
+        button, .btn { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 5px; }
+        button:hover, .btn:hover { background-color: #0056b3; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-info { background-color: #17a2b8; }
+        .btn-info:hover { background-color: #138496; }
+        .btn-sm { padding: 5px 10px; font-size: 0.875em; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .no-results { text-align: center; padding: 15px; color: #777; }
+        #loadingMessage {display: none; text-align: center; padding: 10px; color: #0056b3;}
+        .actions-header { width: 150px; } /* Ancho para la columna de acciones */
+        .actions-cell { text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Gestión Dinámica de Productos</h1>
+
+    <div class="section">
+        <h2>Cargar Nuevo Catálogo de Productos (JSON)</h2>
+        <div th:if="${errorProductoCarga}" class="message error" id="cargaErrorMsg">
+            <p th:text="${errorProductoCarga}"></p>
+        </div>
+        <div th:if="${exitoProductoCarga}" class="message success" id="cargaExitoMsg">
+            <p th:text="${exitoProductoCarga}"></p>
+        </div>
+
+        <form id="formCargaMasiva" method="post" th:action="@{/admin/productos/carga-masiva-json-mvc}" enctype="multipart/form-data">
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" th:if="${_csrf}"/>
+            <div class="form-group">
+                <label for="archivoJson">Seleccionar archivo JSON:</label>
+                <input type="file" id="archivoJson" name="archivoJson" accept=".json,text/plain" required />
+            </div>
+            <button type="submit">Cargar Catálogo</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Consultar Productos Existentes</h2>
+        <form id="filtroProductosForm" class="form-inline">
+            <div class="form-group">
+                <label for="filtroDescripcion">Descripción:</label>
+                <input type="text" id="filtroDescripcion" name="descripcion" />
+            </div>
+            <div class="form-group">
+                <label for="filtroProveedorId">Proveedor:</label>
+                <select id="filtroProveedorId" name="proveedorId">
+                    <option value="">-- Todos --</option>
+                    <option th:each="prov : ${proveedores}"
+                            th:value="${prov.id}"
+                            th:text="${prov.nombre}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filtroCategoriaNombre">Categoría:</label>
+                <select id="filtroCategoriaNombre" name="categoriaNombre">
+                    <option value="">-- Todas --</option>
+                    <option th:each="cat : ${categorias}"
+                            th:value="${cat.nombre}"
+                            th:text="${cat.nombre}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filtroEsPerecedero">Es Perecedero:</label>
+                <select id="filtroEsPerecedero" name="esPerecedero">
+                    <option value="">-- Ambos --</option>
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit">Filtrar Productos</button>
+                <button type="button" id="limpiarFiltrosBtn" class="btn btn-secondary" style="margin-left: 5px;">Limpiar Filtros</button>
+            </div>
+        </form>
+
+        <div id="loadingMessage">Cargando productos...</div>
+        <div id="consultaErrorMsg" class="message error" style="display:none;"></div>
+        <div id="operacionProductoMsg" class="message" style="display:none;"></div>
+
+
+        <table id="tablaProductos">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Marca</th>
+                <th>Unidades</th>
+                <th>Perecedero</th>
+                <th>Proveedor</th>
+                <th class="actions-header">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div id="noResultsProductos" class="no-results" style="display:none;">
+            <p>No se encontraron productos con los criterios seleccionados.</p>
+        </div>
+        <div style="margin-top: 20px;">
+            <button id="btnEliminarTodosProductos" class="btn btn-danger">Eliminar Todos los Productos</button>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <a th:href="@{/admin/area_personal}" class="btn btn-secondary">Volver al Área Personal</a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const filtroForm = document.getElementById('filtroProductosForm');
+        const tablaProductosBody = document.querySelector('#tablaProductos tbody');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const noResultsProductos = document.getElementById('noResultsProductos');
+        const consultaErrorMsg = document.getElementById('consultaErrorMsg');
+        const operacionProductoMsg = document.getElementById('operacionProductoMsg');
+        const limpiarFiltrosBtn = document.getElementById('limpiarFiltrosBtn');
+        const btnEliminarTodos = document.getElementById('btnEliminarTodosProductos');
+
+        const csrfToken = /*[[${_csrf?.token}]]*/ null;
+        const csrfHeaderName = /*[[${_csrf?.headerName}]]*/ null;
+
+        function mostrarMensajeOperacion(mensaje, tipo) {
+            operacionProductoMsg.textContent = mensaje;
+            operacionProductoMsg.className = 'message ' + tipo; // tipo puede ser 'success' o 'error'
+            operacionProductoMsg.style.display = 'block';
+            setTimeout(() => {
+                operacionProductoMsg.style.display = 'none';
+            }, 5000);
+        }
+
+        async function fetchProductos(params = {}) {
+            loadingMessage.style.display = 'block';
+            tablaProductosBody.innerHTML = '';
+            noResultsProductos.style.display = 'none';
+            consultaErrorMsg.style.display = 'none';
+            consultaErrorMsg.textContent = '';
+
+            const queryParams = new URLSearchParams();
+            if (params.descripcion) queryParams.append('descripcion', params.descripcion);
+            if (params.proveedorId) queryParams.append('proveedorId', params.proveedorId);
+            if (params.categoriaNombre) queryParams.append('categoriaNombre', params.categoriaNombre);
+            if (params.esPerecedero !== undefined && params.esPerecedero !== "") queryParams.append('esPerecedero', params.esPerecedero);
+
+            try {
+                const apiUrl = /*[[@{/api/admin/productos/consultar}]]*/ '/api/admin/productos/consultar';
+                const response = await fetch(`${apiUrl}?${queryParams.toString()}`);
+                loadingMessage.style.display = 'none';
+
+                if (response.status === 204) {
+                    noResultsProductos.style.display = 'block';
+                    return;
+                }
+                if (!response.ok) {
+                    let errorData = { message: `Error del servidor: ${response.status}` };
+                    try { errorData = await response.json(); } catch (e) { /* No es JSON */ }
+                    throw new Error(errorData.error || errorData.message || response.statusText);
+                }
+
+                const productos = await response.json();
+                renderTablaProductos(productos);
+
+            } catch (error) {
+                loadingMessage.style.display = 'none';
+                console.error('Error al cargar productos:', error);
+                consultaErrorMsg.textContent = 'Error al cargar productos: ' + error.message;
+                consultaErrorMsg.style.display = 'block';
+                noResultsProductos.style.display = 'block';
+            }
+        }
+
+        function renderTablaProductos(productos) {
+            if (!productos || productos.length === 0) {
+                noResultsProductos.style.display = 'block';
+                return;
+            }
+
+            productos.forEach(prod => {
+                const row = tablaProductosBody.insertRow();
+                row.insertCell().textContent = prod.id || '';
+                row.insertCell().textContent = prod.descripcion || '';
+                row.insertCell().textContent = prod.precio ? `${parseFloat(prod.precio).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}` : '';
+                row.insertCell().textContent = prod.marca || 'N/A';
+                row.insertCell().textContent = prod.unidades !== null ? prod.unidades : '';
+                row.insertCell().textContent = prod.esPerecedero !== null ? (prod.esPerecedero ? 'Sí' : 'No') : 'N/A';
+                row.insertCell().textContent = prod.proveedorNombre || 'N/A';
+
+                const accionesCell = row.insertCell();
+                accionesCell.classList.add('actions-cell');
+
+                const detalleLink = document.createElement('a');
+                const detalleUrlBase = /*[[@{/admin/productos/detalle/}]]*/ '/admin/productos/detalle/';
+                detalleLink.href = detalleUrlBase + prod.id;
+                detalleLink.textContent = 'Detalles';
+                detalleLink.classList.add('btn', 'btn-info', 'btn-sm');
+                accionesCell.appendChild(detalleLink);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Eliminar';
+                deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
+                deleteButton.style.marginLeft = '5px';
+                deleteButton.onclick = function() { eliminarProducto(prod.id); };
+                accionesCell.appendChild(deleteButton);
+            });
+        }
+
+        async function eliminarProducto(productId) { // Renombrada la variable para evitar confusión de ámbito
+            console.log("[DEBUG] eliminarProducto - ID recibido:", productId);
+            console.log("[DEBUG] eliminarProducto - Tipo de ID:", typeof productId);
+
+            if (productId === undefined || productId === null || String(productId).trim() === "") {
+                console.error("[DEBUG] ID de producto inválido para eliminar. ID recibido:", productId);
+                mostrarMensajeOperacion('Error: ID de producto inválido. No se puede eliminar.', 'error');
+                return;
+            }
+
+            if (!confirm(`¿Está seguro de que desea eliminar el producto con ID ${productId}?`)) {
+                return;
+            }
+
+            // Construcción de la URL base de forma segura
+            // Thymeleaf debería resolver esto a algo como '/api/admin/productos' (sin barra al final si es posible)
+            // Si @{...} te da problemas o incluye una barra extra, ajústalo o usa una cadena directa.
+            let baseUrl = /*[[@{/api/admin/productos}]]*/ '/api/admin/productos';
+
+            // Asegurarse de que baseUrl no termine en / si productId ya empieza con / (no debería)
+            // O, más simple, asegurarse que hay exactamente una / entre baseUrl y productId
+            if (baseUrl.endsWith('/')) {
+                baseUrl = baseUrl.slice(0, -1); // Eliminar barra final si existe
+            }
+
+            const url = `${baseUrl}/${productId}`; // Usar template literal para unir
+
+            console.log("[DEBUG] URL construida para fetch DELETE:", url); // Verifica esta URL
+
+            try {
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        ...(csrfToken && csrfHeaderName && { [csrfHeaderName]: csrfToken })
+                    }
+                });
+
+                console.log("[DEBUG] Respuesta del fetch - Status:", response.status);
+                console.log("[DEBUG] Respuesta del fetch - Ok:", response.ok);
+
+                const responseText = await response.text(); // Leer como texto primero
+                console.log("[DEBUG] Respuesta del fetch - Texto de la respuesta:", responseText);
+
+                if (!response.ok) {
+                    let errorMsg = `Error del servidor: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMsg = errorData.error || errorData.message || errorMsg;
+                    } catch (e) {
+                        // No era JSON, el texto ya podría ser el mensaje de error
+                        if(responseText && responseText.length < 300 && responseText.length > 0) {
+                            errorMsg = responseText;
+                        } else if (!responseText && response.status === 404) {
+                            errorMsg = "Recurso no encontrado (404). Verifique la URL.";
+                        }
+                        console.warn("La respuesta de error no fue JSON o estaba vacía. Usando texto/status.", responseText);
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                const data = JSON.parse(responseText); // Si la respuesta fue OK, debería ser JSON
+                mostrarMensajeOperacion(data.mensaje || 'Producto eliminado con éxito.', 'success');
+                fetchProductos();
+            } catch (error) {
+                console.error('[DEBUG] Error completo en la función eliminarProducto:', error);
+                mostrarMensajeOperacion('Error al eliminar producto: ' + error.message, 'error');
+            }
+        }
+
+        filtroForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(filtroForm);
+            const params = {
+                descripcion: formData.get('descripcion'),
+                proveedorId: formData.get('proveedorId'),
+                categoriaNombre: formData.get('categoriaNombre'),
+                esPerecedero: formData.get('esPerecedero')
+            };
+            fetchProductos(params);
+        });
+
+        limpiarFiltrosBtn.addEventListener('click', function() {
+            filtroForm.reset();
+            fetchProductos();
+        });
+
+        btnEliminarTodos.addEventListener('click', async function() {
+            if (!confirm('¿Está SEGURO de que desea eliminar TODOS los productos? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            try {
+                const url = /*[[@{/api/admin/productos/eliminar-todos}]]*/ '/api/admin/productos/eliminar-todos';
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        [csrfHeaderName]: csrfToken
+                    }
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || `Error del servidor: ${response.status}`);
+                }
+                mostrarMensajeOperacion(data.mensaje || 'Todos los productos han sido eliminados.', 'success');
+                fetchProductos(); // Recargar la tabla, que debería estar vacía
+            } catch (error) {
+                console.error('Error al eliminar todos los productos:', error);
+                mostrarMensajeOperacion('Error al eliminar todos los productos: ' + error.message, 'error');
+            }
+        });
+
+        fetchProductos();
+
+        setTimeout(() => {
+            const cargaError = document.getElementById('cargaErrorMsg');
+            const cargaExito = document.getElementById('cargaExitoMsg');
+            if(cargaError) cargaError.style.display = 'none';
+            if(cargaExito) cargaExito.style.display = 'none';
+        }, 5000);
+
+    });
+</script>
+
+</body>
+</html>

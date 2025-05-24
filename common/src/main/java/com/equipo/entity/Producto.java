@@ -1,5 +1,6 @@
 package com.equipo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data; // Se añade Lombok para simplificar
 import java.time.LocalDate;
@@ -43,7 +44,8 @@ public class Producto {
     // --- RELACIONES ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proveedor_id", nullable = false)
-    private Proveedor proveedor; // [cite: 18, 24]
+    @JsonBackReference
+    private Proveedor proveedor;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
@@ -51,7 +53,10 @@ public class Producto {
             joinColumns = @JoinColumn(name = "producto_id"),
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
-    private Set<Categoria> categorias = new HashSet<>(); // [cite: 6, 18, 33]
+// @JsonBackReference // Si usaste @JsonManagedReference en Categoria.productos
+// O @JsonIgnoreProperties({"productos"}) en la clase Proveedor (si es más simple)
+// O considera usar DTOs para la respuesta de la API (mejor práctica)
+    private Set<Categoria> categorias = new HashSet<>();
 
 
     // --- CAMPOS ESPECÍFICOS (EJEMPLOS) ---
