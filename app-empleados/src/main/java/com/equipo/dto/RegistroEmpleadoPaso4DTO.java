@@ -6,32 +6,34 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat; // Asegúrate de importar esto
 
 import java.time.LocalDate;
 
 @Data
 public class RegistroEmpleadoPaso4DTO {
 
-    @NotBlank(message = "El número de cuenta es obligatorio")
-    @Pattern(regexp = "^[A-Z]{2}\\d{22}$", message = "El IBAN debe tener el formato correcto (ej. ES6600190020961234567890).")
+    @NotBlank(message = "{datosEconomicos.numeroCuenta.obligatorio}")
+    @Pattern(regexp = "^[A-Z]{2}\\d{22}$", message = "{datosEconomicos.numeroCuenta.formato}")
     private String numeroCuenta;
 
-    @NotBlank(message = "El tipo de contrato es obligatorio")
+    @NotBlank(message = "{datosEconomicos.tipoContrato.obligatorio}")
     private String tipoContrato;
 
-    @NotBlank(message = "La categoría profesional es obligatoria")
+    @NotBlank(message = "{datosEconomicos.categoriaProfesional.obligatoria}")
     private String categoriaProfesional;
 
-    @NotNull(message = "El salario base mensual es obligatorio")
-    @DecimalMin(value = "0.01", message = "El salario base mensual debe ser mayor que 0")
+    @NotNull(message = "{datosEconomicos.salarioBase.obligatorio}")
+    @DecimalMin(value = "0.01", message = "{datosEconomicos.salarioBase.positivo}")
     private Double salarioBaseMensual;
 
-    private Double complementoMensual; // No marcado como @NotBlank/@NotNull ya que podría ser opcional
+    private Double complementoMensual;
 
-    @NotBlank(message = "El devengo de paga extra es obligatorio")
+    @NotBlank(message = "{datosEconomicos.devengo.obligatorio}")
     private String devengoPagaExtra;
 
-    @NotNull(message = "La fecha de incorporación es obligatoria")
+    @NotNull(message = "{datosEconomicos.fechaIncorporacion.obligatoria}")
     @PastOrPresent(message = "La fecha de incorporación no puede ser en el futuro")
+    @DateTimeFormat(pattern = "dd/MM/yyyy") // Especifica el formato esperado
     private LocalDate fechaIncorporacion;
 }
