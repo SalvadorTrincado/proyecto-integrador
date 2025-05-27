@@ -24,7 +24,7 @@
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 700px; /* Un poco más ancho para acomodar más info */
+            max-width: 700px;
             text-align: center;
         }
 
@@ -40,16 +40,16 @@
             font-size: 1.1em;
         }
 
-        .user-stats, .employee-actions, .registration-prompt, .etiquetas-list {
+        .user-stats, .employee-actions, .registration-prompt, .etiquetas-list, .colaboraciones-section {
             margin-top: 20px;
             padding: 15px;
-            background-color: #f8f9fa; /* Fondo ligeramente diferente para secciones */
+            background-color: #f8f9fa;
             border: 1px solid #e9ecef;
             border-radius: 8px;
             text-align: left;
         }
 
-        .user-stats h3, .employee-actions h3, .etiquetas-list h3 {
+        .user-stats h3, .employee-actions h3, .etiquetas-list h3, .colaboraciones-section h3 {
             margin-top: 0;
             margin-bottom: 12px;
             color: #3a5a40;
@@ -57,6 +57,13 @@
             border-bottom: 1px solid #dad7cd;
             padding-bottom: 8px;
         }
+        .colaboraciones-section h4 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #588157;
+            font-size: 1.1em;
+        }
+
 
         .user-stats p strong {
             color: #333;
@@ -78,30 +85,30 @@
             font-size: 0.9em;
         }
 
-        .action-button { /* Estilo común para enlaces de acción */
+        .action-button {
             display: inline-block;
             margin-top: 10px;
-            margin-right: 10px; /* Espacio entre botones si hay varios en la misma línea */
+            margin-right: 10px;
             padding: 12px 22px;
-            background-color: #588157; /* Verde medio, unifica con el estilo de botones de formulario */
+            background-color: #588157;
             color: white;
             text-decoration: none;
             border-radius: 6px;
             transition: background-color 0.3s ease, transform 0.2s ease;
             font-weight: bold;
-            border: none; /* Si es un <a>, quitar borde por defecto */
+            border: none;
         }
         .action-button:hover {
-            background-color: #3a5a40; /* Verde bosque oscuro */
-            color: white; /* Asegurar que el color del texto no cambie con :hover de <a> */
+            background-color: #3a5a40;
+            color: white;
             transform: translateY(-1px);
         }
 
-        form[action="/logout"] {
+        form[action="/logout"] { /* */
             margin-top: 30px;
         }
-        form[action="/logout"] button {
-            background-color: #dc3545; /* Rojo para logout */
+        form[action="/logout"] button { /* */
+            background-color: #dc3545;
             color: white;
             padding: 12px 25px;
             border: none;
@@ -111,16 +118,16 @@
             font-weight: bold;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-        form[action="/logout"] button:hover {
-            background-color: #c82333; /* Rojo más oscuro */
+        form[action="/logout"] button:hover { /* */
+            background-color: #c82333;
             transform: translateY(-1px);
         }
 
         .message-global {
             width: 100%;
-            max-width: 640px; /* Coincide con el ancho del contenido principal */
+            max-width: 640px;
             padding: 12px 15px;
-            margin: 0 auto 20px auto; /* Centrar y añadir margen inferior */
+            margin: 0 auto 20px auto;
             border-radius: 5px;
             text-align: center;
             font-weight: bold;
@@ -137,6 +144,81 @@
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
         }
+        .colaboraciones-section li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #d4d8cc;
+            line-height: 1.6;
+        }
+        .colaboraciones-section li:last-child {
+            border-bottom: none;
+        }
+        .colaboraciones-section .estado-pendiente { color: #E67E22; font-weight: bold; }
+        .colaboraciones-section .estado-aceptada { color: #2ECC71; font-weight: bold; }
+        .colaboraciones-section .estado-rechazada { color: #E74C3C; font-weight: bold; }
+        .colaboraciones-section .estado-cancelada { color: #7f8c8d; font-weight: bold; font-style: italic; }
+
+        .form-invitar {
+            margin-bottom: 20px;
+        }
+        .form-invitar input[type="email"] {
+            padding: 8px 10px;
+            margin-right: 8px;
+            border: 1px solid #a3b18a;
+            border-radius: 4px;
+            width: calc(70% - 18px);
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        .form-invitar button {
+            padding: 9px 15px;
+            font-size: 1em;
+            vertical-align: middle;
+        }
+        .error-invitacion {
+            color: #c0392b;
+            font-size: 0.9em;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .colaboracion-actions .action-button-small,
+        .colaboracion-actions .chat-link,
+        .colaboracion-actions .cancel-colab-btn {
+            font-size:0.8em;
+            padding: 6px 12px;
+            margin-left: 8px;
+            text-decoration: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: normal;
+        }
+        .colaboracion-actions .chat-link {
+            background-color: #3498db;
+        }
+        .colaboracion-actions .chat-link:hover {
+            background-color: #2980b9;
+        }
+        .colaboracion-actions .cancel-colab-btn {
+            background-color: #588157;
+        }
+        .colaboracion-actions .cancel-colab-btn:hover {
+            background-color: #3a5a40;
+        }
+        .colaboracion-actions form {
+            margin-bottom: 0;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .colaboracion-actions {
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
     </style>
 </head>
 <body>
@@ -159,7 +241,6 @@
         <p>Total de conexiones HTTP (esta sesión): <strong th:text="${contadorConexionesHttp != null ? contadorConexionesHttp : 0}">0</strong></p>
     </div>
 
-
     <div th:if="${esEmpleado == false}" class="registration-prompt">
         <p th:if="${mensajeOpcionRegistro}" th:text="${mensajeOpcionRegistro}"></p>
         <p>Parece que aún no has completado tu perfil de empleado.</p>
@@ -179,6 +260,88 @@
         </div>
         <a th:href="@{/empleado/nominas/consultar}" class="action-button">Consultar Mis Nóminas</a>
         <a th:href="@{/empleado/modificar-datos}" class="action-button">Modificar Mis Datos</a>
+    </div>
+
+    <div th:if="${esEmpleado == true}" class="colaboraciones-section">
+        <h3>Colaboraciones</h3>
+
+        <h4>Invitar a Colaboración</h4>
+        <form th:action="@{/empleado/colaboraciones/invitar}" method="post" th:object="${invitacionDTO}" class="form-invitar">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+            <input type="email" th:field="*{emailReceptor}" placeholder="Email del empleado a invitar" required />
+            <button type="submit" class="action-button">Enviar Invitación</button>
+            <div th:if="${#fields.hasErrors('emailReceptor')}" class="error-invitacion" th:errors="*{emailReceptor}"></div>
+            <div th:if="${errorInvitacion}" class="error-invitacion" th:text="${errorInvitacion}"></div>
+        </form>
+
+        <h4>Mis Invitaciones Enviadas</h4>
+        <ul th:if="${!#lists.isEmpty(invitacionesEnviadas)}">
+            <li th:each="inv : ${invitacionesEnviadas}">
+                Invitación a: <strong th:text="${inv.receptorNombreCompleto}"></strong>
+                (<span th:text="${inv.receptorEmail}"></span>) - Fecha: <span th:text="${#temporals.format(inv.fechaInvitacion, 'dd/MM/yyyy HH:mm')}"></span>
+                - Estado: <span th:text="${inv.estado}"
+                                th:classappend="${inv.estado.name() == 'PENDIENTE' ? 'estado-pendiente' :
+                                                (inv.estado.name() == 'ACEPTADA' ? 'estado-aceptada' :
+                                                (inv.estado.name() == 'RECHAZADA' ? 'estado-rechazada' :
+                                                (inv.estado.name() == 'CANCELADA' ? 'estado-cancelada' : '')))}"></span>
+                <span th:if="${inv.fechaRespuesta != null}"> (Respondida el: <span th:text="${#temporals.format(inv.fechaRespuesta, 'dd/MM/yyyy HH:mm')}"></span>)</span>
+                <span th:if="${inv.estado.name() == 'CANCELADA' && inv.fechaCancelacion != null}"> (Cancelada el: <span th:text="${#temporals.format(inv.fechaCancelacion, 'dd/MM/yyyy HH:mm')}"></span><span th:if="${inv.canceladaPorNombre != null}" th:text="' por ' + ${inv.canceladaPorNombre}"></span>)</span>
+
+                <div class="colaboracion-actions" th:if="${inv.estado.name() == 'ACEPTADA' and inv.puedeChatear}">
+                    <a th:href="@{/empleado/colaboraciones/{id}/chat(id=${inv.id})}" class="chat-link">Abrir Chat</a>
+                </div>
+                <div class="colaboracion-actions" th:if="${inv.estado.name() == 'ACEPTADA' and inv.puedeCancelar}">
+                    <form th:action="@{/empleado/colaboraciones/cancelar/{id}(id=${inv.id})}" method="post"
+                          onsubmit="return confirm('¿Está seguro de que desea cancelar esta colaboración?');">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+                        <button type="submit" class="cancel-colab-btn">Cancelar</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <p th:if="${#lists.isEmpty(invitacionesEnviadas)}">No has enviado ninguna invitación.</p>
+
+        <h4>Invitaciones Recibidas</h4>
+        <ul th:if="${!#lists.isEmpty(invitacionesRecibidas)}">
+            <li th:each="inv : ${invitacionesRecibidas}">
+                <div>
+                    De: <strong th:text="${inv.emisorNombreCompleto}"></strong>
+                    (<span th:text="${inv.emisorEmail}"></span>)
+                    - Fecha: <span th:text="${#temporals.format(inv.fechaInvitacion, 'dd/MM/yyyy HH:mm')}"></span>
+                    <br/> Estado: <span th:text="${inv.estado}"
+                                        th:classappend="${inv.estado.name() == 'PENDIENTE' ? 'estado-pendiente' :
+                                                        (inv.estado.name() == 'ACEPTADA' ? 'estado-aceptada' :
+                                                        (inv.estado.name() == 'RECHAZADA' ? 'estado-rechazada' :
+                                                        (inv.estado.name() == 'CANCELADA' ? 'estado-cancelada' : '')))}"></span>
+                    <span th:if="${inv.fechaRespuesta != null}">
+                        (Respondida el: <span th:text="${#temporals.format(inv.fechaRespuesta, 'dd/MM/yyyy HH:mm')}"></span>)
+                    </span>
+                    <span th:if="${inv.estado.name() == 'CANCELADA' && inv.fechaCancelacion != null}"> (Cancelada el: <span th:text="${#temporals.format(inv.fechaCancelacion, 'dd/MM/yyyy HH:mm')}"></span><span th:if="${inv.canceladaPorNombre != null}" th:text="' por ' + ${inv.canceladaPorNombre}"></span>)</span>
+                </div>
+
+                <div th:if="${inv.estado.name() == 'PENDIENTE'}" class="invitacion-acciones-recibidas">
+                    <form th:action="@{/empleado/colaboraciones/aceptar/{id}(id=${inv.id})}" method="post" style="display: inline-block;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+                        <button type="submit" class="action-button-small" style="background-color: #2ECC71;">Aceptar</button>
+                    </form>
+                    <form th:action="@{/empleado/colaboraciones/rechazar/{id}(id=${inv.id})}" method="post" style="display: inline-block;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+                        <button type="submit" class="action-button-small" style="background-color: #E74C3C;">Rechazar</button>
+                    </form>
+                </div>
+                <div class="colaboracion-actions" th:if="${inv.estado.name() == 'ACEPTADA' and inv.puedeChatear}">
+                    <a th:href="@{/empleado/colaboraciones/{id}/chat(id=${inv.id})}" class="chat-link">Abrir Chat</a>
+                </div>
+                <div class="colaboracion-actions" th:if="${inv.estado.name() == 'ACEPTADA' and inv.puedeCancelar}">
+                    <form th:action="@{/empleado/colaboraciones/cancelar/{id}(id=${inv.id})}" method="post"
+                          onsubmit="return confirm('¿Está seguro de que desea cancelar esta colaboración?');">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+                        <button type="submit" class="cancel-colab-btn">Cancelar</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <p th:if="${#lists.isEmpty(invitacionesRecibidas)}">No has recibido ninguna invitación.</p>
     </div>
 
     <form th:action="@{/logout}" method="post">

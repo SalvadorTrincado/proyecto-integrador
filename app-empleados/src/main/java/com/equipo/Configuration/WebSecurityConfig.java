@@ -87,7 +87,8 @@ public class WebSecurityConfig {
                                 "/resumen/exito", "/resumen/exito-post",
                                 "/aplicacion_corporativa/area_personal",
                                 "/empleado/nominas/**",
-                                "/empleado/modificar-datos"
+                                "/empleado/modificar-datos",
+                                "/empleado/colaboraciones/**"
                         ).authenticated()
                         .anyRequest().permitAll() // Ajusta según necesidad, podría ser .authenticated()
                 )

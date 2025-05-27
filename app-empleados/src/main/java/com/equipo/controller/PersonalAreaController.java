@@ -1,9 +1,13 @@
 package com.equipo.controller;
 
+import com.equipo.dto.ColaboracionDisplayDTO;
+import com.equipo.dto.InvitacionColaboracionDTO;
+import com.equipo.entity.Colaboracion;
 import com.equipo.entity.Empleado;
 import com.equipo.entity.Etiqueta;
 import com.equipo.entity.Usuario;
 import com.equipo.service.AutenticacionService;
+import com.equipo.service.ColaboracionService;
 import com.equipo.service.EmpleadoService;
 import com.equipo.service.UsuarioService;
 import org.slf4j.Logger;
@@ -17,10 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.servlet.http.HttpSession;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -30,12 +31,16 @@ public class PersonalAreaController {
     private final EmpleadoService empleadoService;
     private final UsuarioService usuarioService;
     private final AutenticacionService autenticacionService;
+    private final ColaboracionService colaboracionService; // Nueva inyección
 
     @Autowired
-    public PersonalAreaController(EmpleadoService empleadoService, UsuarioService usuarioService, AutenticacionService autenticacionService) {
+    public PersonalAreaController(EmpleadoService empleadoService, UsuarioService usuarioService,
+                                  AutenticacionService autenticacionService,
+                                  ColaboracionService colaboracionService) { // Añadir al constructor
         this.empleadoService = empleadoService;
         this.usuarioService = usuarioService;
         this.autenticacionService = autenticacionService;
+        this.colaboracionService = colaboracionService; // Asignar
     }
 
     @GetMapping("/aplicacion_corporativa/area_personal")
@@ -65,14 +70,11 @@ public class PersonalAreaController {
 
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
-            // El contador de conexiones válidas (6d) se actualiza en AutenticacionService tras un login exitoso.
-            // Aquí, obtenemos el usuario directamente de la BD para tener el valor más reciente.
             Usuario usuarioActualizadoConContadores = usuarioService.obtenerUsuarioPorEmail(userEmail)
-                    .orElse(usuario); // Fallback por si acaso
+                    .orElse(usuario);
 
             model.addAttribute("usuario", usuarioActualizadoConContadores);
 
-            // Tarea 6e: Contador de conexiones HTTP (por sesión)
             Integer contadorHttp = (Integer) session.getAttribute("contadorConexionesHttp");
             if (contadorHttp == null) {
                 contadorHttp = 0;
@@ -80,15 +82,16 @@ public class PersonalAreaController {
             contadorHttp++;
             session.setAttribute("contadorConexionesHttp", contadorHttp);
             model.addAttribute("contadorConexionesHttp", contadorHttp);
-            logger.info("Contador de conexiones HTTP para la sesión del usuario {}: {}", userEmail, contadorHttp);
 
-            // Guardar el ID de usuario en sesión para el flujo de registro de empleado
             session.setAttribute("usuarioAutenticadoId", usuarioActualizadoConContadores.getId());
-
 
             Optional<Empleado> empleadoOpt = empleadoService.obtenerEmpleadoPorId(usuarioActualizadoConContadores.getId());
             boolean esEmpleado = empleadoOpt.isPresent();
             model.addAttribute("esEmpleado", esEmpleado);
+
+            if (!model.containsAttribute("invitacionDTO")) {
+                model.addAttribute("invitacionDTO", new InvitacionColaboracionDTO());
+            }
 
             if (esEmpleado) {
                 Empleado empleado = empleadoOpt.get();
@@ -101,9 +104,18 @@ public class PersonalAreaController {
                 model.addAttribute("etiquetasDelEmpleado", nombresEtiquetas);
                 logger.info("Usuario {} es un empleado: {}. Etiquetas: {}", userEmail, nombreCompleto, nombresEtiquetas);
 
+                // Cargar colaboraciones usando los nuevos métodos del servicio que devuelven DTOs
+                List<ColaboracionDisplayDTO> invitacionesEnviadas = colaboracionService.findInvitacionesEnviadasDisplay(empleado.getId());
+                List<ColaboracionDisplayDTO> invitacionesRecibidas = colaboracionService.findInvitacionesRecibidasDisplay(empleado.getId());
+
+                model.addAttribute("invitacionesEnviadas", invitacionesEnviadas);
+                model.addAttribute("invitacionesRecibidas", invitacionesRecibidas);
+
             } else {
                 model.addAttribute("mensajeOpcionRegistro", "Aún no has completado tu perfil de empleado.");
                 model.addAttribute("etiquetasDelEmpleado", Collections.emptySet());
+                model.addAttribute("invitacionesEnviadas", Collections.emptyList());
+                model.addAttribute("invitacionesRecibidas", Collections.emptyList());
                 logger.info("Usuario {} NO es un empleado. Mostrando opción para completar registro.", userEmail);
             }
         } else {
