@@ -1,6 +1,5 @@
 package com.equipo.Configuration;
 
-// ... otras importaciones ...
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,7 +32,7 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler(
-            com.equipo.service.AutenticacionService autenticacionService) { // Asegúrate que esta es tu clase de servicio
+            com.equipo.service.AutenticacionService autenticacionService) {
         return (request, response, authentication) -> {
             String username = authentication.getName();
             if (username != null) {
@@ -49,7 +48,7 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationFailureHandler customAuthenticationFailureHandler(
-            com.equipo.service.AutenticacionService autenticacionService) { // Asegúrate que esta es tu clase de servicio
+            com.equipo.service.AutenticacionService autenticacionService) {
         return (request, response, exception) -> {
             String email = request.getParameter("email");
             String failureUrlKey = "credenciales";
@@ -74,32 +73,29 @@ public class WebSecurityConfig {
                                                    AuthenticationFailureHandler failureHandler) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(
-                                "/css/**", "/js/**", "/h2-console/**",
-                                "/autenticacion/paso1", "/autenticacion/paso1-post",
-                                "/autenticacion/paso2",
-                                "/registrar_usuario", "/registrar_usuario_post",
-                                "/recuperar-password", // Ruta para la vista de recuperación
-                                "/api/password-recovery/**" // Rutas de la API para recuperación
+                        .requestMatchers( // Rutas públicas
+                                "/css/**",
+                                "/js/**", // Si tienes JS globales que deban ser públicos
+                                "/h2-console/**",
+                                "/autenticacion/paso1",
+                                "/autenticacion/paso1-post",
+                                "/autenticacion/paso2", // La página para introducir contraseña
+                                "/registrar_usuario",
+                                "/registrar_usuario_post",
+                                "/recuperar-password",
+                                "/api/password-recovery/**" // API para recuperación de contraseña
                         ).permitAll()
-                        .requestMatchers(
-                                "/aplicacion_corporativa/registro/**",
-                                "/resumen/exito", "/resumen/exito-post",
-                                "/aplicacion_corporativa/area_personal",
-                                "/empleado/nominas/**",
-                                "/empleado/modificar-datos",
-                                "/empleado/colaboraciones/**"
-                        ).authenticated()
-                        .anyRequest().permitAll() // Ajusta según necesidad, podría ser .authenticated()
+                        // Todas las demás rutas requerirán autenticación
+                        .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
-                        .loginPage("/autenticacion/paso1")
-                        .loginProcessingUrl("/autenticacion/paso2-post")
+                        .loginPage("/autenticacion/paso1") // Página de login personalizada
+                        .loginProcessingUrl("/autenticacion/paso2-post") // URL a la que se envía el formulario de login (paso 2)
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(successHandler)
                         .failureHandler(failureHandler)
-                        .permitAll()
+                        .permitAll() // Permite el acceso a la página de login y al procesamiento del login
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
@@ -109,10 +105,10 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .csrf((csrf) -> csrf
-                        .ignoringRequestMatchers("/h2-console/**", "/api/**") // Ignorar CSRF para H2 y API REST
+                        .ignoringRequestMatchers("/h2-console/**", "/api/**") // Ignorar CSRF para H2 console y tu API REST
                 )
                 .headers((headers) -> headers
-                        .frameOptions((frameOptions) -> frameOptions.sameOrigin())
+                        .frameOptions((frameOptions) -> frameOptions.sameOrigin()) // Necesario para H2 Console
                 );
 
         return http.build();

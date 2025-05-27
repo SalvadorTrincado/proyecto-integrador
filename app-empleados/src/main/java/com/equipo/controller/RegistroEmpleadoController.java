@@ -132,18 +132,27 @@ public class RegistroEmpleadoController {
         RegistroEmpleadoPaso4DTO paso4DTO = (RegistroEmpleadoPaso4DTO) session.getAttribute("registroEmpleadoPaso4DTO");
         UUID usuarioIdAutenticado = (UUID) session.getAttribute("usuarioAutenticadoId");
 
-        if (paso1DTO == null || paso2DTO == null || paso3DTO == null || paso4DTO == null || usuarioIdAutenticado == null) {
-            redirectAttributes.addFlashAttribute("errorGlobal", "Faltan datos de pasos anteriores o la sesión ha expirado. Por favor, comience el registro de nuevo.");
-            return "redirect:/registro_empleado_paso1";
+        if (usuarioIdAutenticado == null) {
+            redirectAttributes.addFlashAttribute("errorGlobal", "Sesión inválida o expirada. Por favor, inicie sesión y comience el registro de nuevo.");
+            return "redirect:/autenticacion/paso1"; // O a donde se maneje el login
         }
 
+        // Se pasan los DTOs al modelo incluso si son null. Thymeleaf los manejará.
         modelo.addAttribute("registroEmpleadoPaso1DTO", paso1DTO);
         modelo.addAttribute("registroEmpleadoPaso2DTO", paso2DTO);
         modelo.addAttribute("registroEmpleadoPaso3DTO", paso3DTO);
         modelo.addAttribute("registroEmpleadoPaso4DTO", paso4DTO);
 
+        boolean todosLosPasosCompletos = paso1DTO != null && paso2DTO != null && paso3DTO != null && paso4DTO != null;
+        modelo.addAttribute("todosLosPasosCompletos", todosLosPasosCompletos);
+
+        if (!todosLosPasosCompletos) {
+            modelo.addAttribute("mensajeResumenIncompleto", "Aún faltan completar algunos pasos del registro. Esta es una vista previa con los datos ingresados hasta ahora. El botón de finalizar estará deshabilitado hasta que todos los pasos se completen.");
+        }
+
         return "aplicacion_corporativa/registro/registro_empleado_paso5";
     }
+
 
     @PostMapping("/resumen/exito-post")
     public String procesarPaginaExitoPost(HttpSession session, RedirectAttributes redirectAttributes) {
@@ -153,10 +162,13 @@ public class RegistroEmpleadoController {
         RegistroEmpleadoPaso3DTO paso3DTO = (RegistroEmpleadoPaso3DTO) session.getAttribute("registroEmpleadoPaso3DTO");
         RegistroEmpleadoPaso4DTO paso4DTO = (RegistroEmpleadoPaso4DTO) session.getAttribute("registroEmpleadoPaso4DTO");
 
+        // Comprobación crucial: solo proceder si todos los datos están.
         if (usuarioIdAutenticado == null || paso1DTO == null || paso2DTO == null || paso3DTO == null || paso4DTO == null) {
             logger.warn("Intento de procesar /resumen/exito-post sin todos los datos de sesión. Usuario ID: {}", usuarioIdAutenticado);
-            redirectAttributes.addFlashAttribute("errorGlobal", "Error al procesar el registro debido a datos incompletos en sesión. Por favor, inténtelo de nuevo desde el paso 1.");
-            return "redirect:/registro_empleado_paso1";
+            redirectAttributes.addFlashAttribute("errorGlobal", "No se pueden finalizar el registro porque faltan datos de pasos anteriores. Por favor, complete todos los pasos.");
+            // Redirigir de nuevo al resumen para que el usuario vea qué falta o al paso 1.
+            // Mejor al resumen para que vea el estado actual.
+            return "redirect:/resumen/exito";
         }
 
         try {
@@ -171,6 +183,7 @@ public class RegistroEmpleadoController {
             session.removeAttribute("registroEmpleadoPaso2DTO");
             session.removeAttribute("registroEmpleadoPaso3DTO");
             session.removeAttribute("registroEmpleadoPaso4DTO");
+            // Opcionalmente, podrías dejar el usuarioIdAutenticado en sesión si es necesario para el área personal.
 
             redirectAttributes.addFlashAttribute("mensajeExitoGlobal", "¡Registro de empleado completado con éxito!");
             return "redirect:/aplicacion_corporativa/area_personal";
@@ -178,11 +191,12 @@ public class RegistroEmpleadoController {
         } catch (IllegalStateException e) {
             logger.warn("IllegalStateException al registrar empleado (ID: {}): {}", usuarioIdAutenticado, e.getMessage());
             redirectAttributes.addFlashAttribute("errorGlobal", e.getMessage());
+            // Si falla por ID duplicado, es un problema que el área personal debería manejar o redirigir a login.
             return "redirect:/aplicacion_corporativa/area_personal";
         } catch (Exception e) {
             logger.error("Excepción general al procesar el registro del empleado para usuario ID {}: {}", usuarioIdAutenticado, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorGlobal", "Ocurrió un error inesperado al guardar los datos del empleado: " + e.getMessage() +". Por favor, revise los logs o intente más tarde.");
-            return "redirect:/resumen/exito";
+            return "redirect:/resumen/exito"; // Volver al resumen para que el usuario no pierda contexto.
         }
     }
 
@@ -194,47 +208,57 @@ public class RegistroEmpleadoController {
         Empleado empleado = new Empleado();
         empleado.setId(usuarioId);
 
-        empleado.setNombre(paso1DTO.getNombre());
-        empleado.setApellidos(paso1DTO.getApellidos());
-        if (paso1DTO.getFotografia() != null && !paso1DTO.getFotografia().isEmpty()) {
-            empleado.setFotografia(paso1DTO.getFotografia().getOriginalFilename());
+        // Asegurarse de que los DTOs no son null antes de acceder a sus propiedades
+        if (paso1DTO != null) {
+            empleado.setNombre(paso1DTO.getNombre());
+            empleado.setApellidos(paso1DTO.getApellidos());
+            if (paso1DTO.getFotografia() != null && !paso1DTO.getFotografia().isEmpty()) {
+                empleado.setFotografia(paso1DTO.getFotografia().getOriginalFilename());
+            }
+            empleado.setGeneroSeleccionado(paso1DTO.getGeneroSeleccionado());
+            empleado.setFechaNacimiento(paso1DTO.getFechaNacimiento());
+            empleado.setEdad(paso1DTO.getEdad());
+            empleado.setPaisNacimiento(paso1DTO.getPaisNacimiento());
+            empleado.setComentarios(paso1DTO.getComentarios());
         }
-        empleado.setGeneroSeleccionado(paso1DTO.getGeneroSeleccionado());
-        empleado.setFechaNacimiento(paso1DTO.getFechaNacimiento());
-        empleado.setEdad(paso1DTO.getEdad());
-        empleado.setPaisNacimiento(paso1DTO.getPaisNacimiento());
-        empleado.setComentarios(paso1DTO.getComentarios());
 
-        empleado.setTipoDocumento(paso2DTO.getTipoDocumento());
-        empleado.setDocumento(paso2DTO.getDocumento());
-        empleado.setPrefijoTelefono(paso2DTO.getPrefijoTelefono());
-        empleado.setTelefonoMovil(paso2DTO.getTelefonoMovil());
-        empleado.setTipoViaDireccionPpal(paso2DTO.getTipoViaDireccionPpal());
-        empleado.setNombreViaDireccionPpal(paso2DTO.getNombreViaDireccionPpal());
-        empleado.setNumeroViaDireccionPpal(paso2DTO.getNumeroViaDireccionPpal());
-        empleado.setPortalDireccionPpal(paso2DTO.getPortalDireccionPpal());
-        empleado.setPlantaDireccionPpal(paso2DTO.getPlantaDireccionPpal());
-        empleado.setPuertaDireccionPpal(paso2DTO.getPuertaDireccionPpal());
-        empleado.setLocalidadDireccionPpal(paso2DTO.getLocalidadDireccionPpal());
-        empleado.setRegionDireccionPpal(paso2DTO.getRegionDireccionPpal());
-        empleado.setCodigoPostalDireccionPpal(paso2DTO.getCodigoPostalDireccionPpal());
+        if (paso2DTO != null) {
+            empleado.setTipoDocumento(paso2DTO.getTipoDocumento());
+            empleado.setDocumento(paso2DTO.getDocumento());
+            empleado.setPrefijoTelefono(paso2DTO.getPrefijoTelefono());
+            empleado.setTelefonoMovil(paso2DTO.getTelefonoMovil());
+            empleado.setTipoViaDireccionPpal(paso2DTO.getTipoViaDireccionPpal());
+            empleado.setNombreViaDireccionPpal(paso2DTO.getNombreViaDireccionPpal());
+            empleado.setNumeroViaDireccionPpal(paso2DTO.getNumeroViaDireccionPpal());
+            empleado.setPortalDireccionPpal(paso2DTO.getPortalDireccionPpal());
+            empleado.setPlantaDireccionPpal(paso2DTO.getPlantaDireccionPpal());
+            empleado.setPuertaDireccionPpal(paso2DTO.getPuertaDireccionPpal());
+            empleado.setLocalidadDireccionPpal(paso2DTO.getLocalidadDireccionPpal());
+            empleado.setRegionDireccionPpal(paso2DTO.getRegionDireccionPpal());
+            empleado.setCodigoPostalDireccionPpal(paso2DTO.getCodigoPostalDireccionPpal());
+        }
 
-        empleado.setDepartamento(paso3DTO.getDepartamento());
-
-        // Restaurar la asignación normal de especialidades
-        if (paso3DTO.getEspecialidadesSeleccionadas() != null) {
-            empleado.setEspecialidadesSeleccionadas(new ArrayList<>(paso3DTO.getEspecialidadesSeleccionadas()));
+        if (paso3DTO != null) {
+            empleado.setDepartamento(paso3DTO.getDepartamento());
+            if (paso3DTO.getEspecialidadesSeleccionadas() != null) {
+                empleado.setEspecialidadesSeleccionadas(new ArrayList<>(paso3DTO.getEspecialidadesSeleccionadas()));
+            } else {
+                empleado.setEspecialidadesSeleccionadas(new ArrayList<>());
+            }
         } else {
             empleado.setEspecialidadesSeleccionadas(new ArrayList<>());
         }
 
-        empleado.setNumeroCuenta(paso4DTO.getNumeroCuenta());
-        empleado.setTipoContrato(paso4DTO.getTipoContrato());
-        empleado.setCategoriaProfesional(paso4DTO.getCategoriaProfesional());
-        empleado.setSalarioBaseMensual(paso4DTO.getSalarioBaseMensual());
-        empleado.setComplementoMensual(paso4DTO.getComplementoMensual());
-        empleado.setDevengoPagaExtra(paso4DTO.getDevengoPagaExtra());
-        empleado.setFechaIncorporacion(paso4DTO.getFechaIncorporacion());
+
+        if (paso4DTO != null) {
+            empleado.setNumeroCuenta(paso4DTO.getNumeroCuenta());
+            empleado.setTipoContrato(paso4DTO.getTipoContrato());
+            empleado.setCategoriaProfesional(paso4DTO.getCategoriaProfesional());
+            empleado.setSalarioBaseMensual(paso4DTO.getSalarioBaseMensual());
+            empleado.setComplementoMensual(paso4DTO.getComplementoMensual());
+            empleado.setDevengoPagaExtra(paso4DTO.getDevengoPagaExtra());
+            empleado.setFechaIncorporacion(paso4DTO.getFechaIncorporacion());
+        }
 
         return empleado;
     }

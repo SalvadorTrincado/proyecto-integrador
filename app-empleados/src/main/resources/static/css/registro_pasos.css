@@ -1,0 +1,277 @@
+/* Estilo general del cuerpo */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f1de;
+    color: #5e503f;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Contenedor principal del formulario */
+.container-registro {
+    background-color: #dad7cd;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+    width: 650px; /* Ancho base para los formularios de pasos */
+    max-width: 95%; /* Máximo responsive */
+    transition: transform 0.3s ease;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.container-registro:hover {
+    transform: translateY(-5px);
+}
+
+/* Títulos del formulario */
+.container-registro h2 {
+    color: #a3b18a;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 1.8em;
+}
+
+/* Barra de navegación de pasos */
+.barra-pasos {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap; /* Para que los pasos se ajusten en pantallas pequeñas */
+    margin-bottom: 25px;
+    padding: 10px;
+    background-color: #c1bfb5;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.barra-pasos a.paso {
+    padding: 10px 15px; /* Ajuste de padding para mejor visualización en wrap */
+    margin: 5px; /* Espacio entre botones cuando se envuelven */
+    text-decoration: none;
+    color: #5e503f;
+    background-color: #e8e5d1;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-weight: bold;
+    text-align: center; /* Asegurar texto centrado */
+}
+
+.barra-pasos a.paso:hover {
+    background-color: #a3b18a;
+    color: white;
+}
+
+.barra-pasos a.paso.paso-activo {
+    background-color: #588157;
+    color: white;
+    box-shadow: 0 0 8px rgba(88, 129, 87, 0.5);
+}
+
+/* Estilo de los campos del formulario dentro del contenedor */
+.container-registro .form-group {
+    margin-bottom: 20px;
+}
+
+.container-registro label {
+    display: block;
+    margin-bottom: 8px;
+    color: #588157;
+    font-weight: bold;
+    font-size: 1.05em;
+}
+
+/* Campos de entrada */
+.container-registro input[type="text"],
+.container-registro input[type="email"],
+.container-registro input[type="password"],
+.container-registro input[type="file"],
+.container-registro input[type="date"],
+.container-registro input[type="number"],
+.container-registro textarea,
+.container-registro select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #a3b18a;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em; /* Consistencia de fuente */
+    margin-top: 5px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container-registro input:focus,
+.container-registro textarea:focus,
+.container-registro select:focus {
+    outline: none;
+    border-color: #588157;
+    box-shadow: 0 0 5px rgba(88, 129, 87, 0.3);
+}
+
+.container-registro input[type="radio"],
+.container-registro input[type="checkbox"] {
+    width: auto;
+    margin-right: 5px; /* Reducir margen para mejor alineación con etiqueta */
+    vertical-align: middle;
+}
+.container-registro .radio-label,
+.container-registro .checkbox-label { /* Aplicar a etiquetas de radio/checkbox */
+    font-weight: normal;
+    display: inline-block; /* Para mejor control */
+    margin-right: 15px;
+    vertical-align: middle; /* Alinear con el input */
+    margin-bottom: 0; /* Evitar salto de línea innecesario */
+}
+/* Contenedor específico para grupos de radio/checkbox si es necesario */
+.container-registro .choices-group div {
+    margin-bottom: 5px; /* Espacio entre opciones de checkbox si están apiladas */
+}
+
+
+/* Estilo de los botones */
+.container-registro .button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Mejor alineación vertical */
+    margin-top: 25px;
+    padding-top: 20px; /* Más espacio */
+    border-top: 1px solid #c1bfb5;
+}
+
+.container-registro button,
+.container-registro input[type="submit"],
+.container-registro input[type="reset"],
+.container-registro input[type="button"], /* Para el botón "Anterior" */
+.container-registro .btn-action { /* Clase genérica para botones como enlaces */
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em; /* Consistencia */
+    font-weight: bold;
+    text-decoration: none; /* Para enlaces actuando como botones */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 120px;
+    text-align: center;
+}
+
+/* Botón de submit/siguiente */
+.container-registro button[type="submit"],
+.container-registro input[type="submit"] {
+    background-color: #588157;
+    color: white;
+}
+
+.container-registro button[type="submit"]:hover,
+.container-registro input[type="submit"]:hover {
+    background-color: #3a5a40;
+    transform: translateY(-1px); /* Ligero efecto hover */
+}
+
+/* Botón de reset */
+.container-registro input[type="reset"] {
+    background-color: #a3b18a;
+    color: white;
+}
+
+.container-registro input[type="reset"]:hover {
+    background-color: #8f9a7a; /* Un poco más oscuro */
+    transform: translateY(-1px);
+}
+
+/* Botón "Anterior" */
+.container-registro input[type="button"].anterior,
+.container-registro button.anterior,
+.container-registro .btn-action.anterior {
+    background-color: #b0aead;
+    color: #333;
+}
+.container-registro input[type="button"].anterior:hover,
+.container-registro button.anterior:hover,
+.container-registro .btn-action.anterior:hover {
+    background-color: #9a988a;
+    transform: translateY(-1px);
+}
+
+/* Mensajes de error */
+.container-registro .error {
+    color: #d9534f;
+    font-size: 0.85em; /* Ligeramente más pequeño */
+    margin-top: 4px; /* Menos margen */
+    display: block; /* Asegurar que ocupe su línea */
+    padding: 6px 8px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
+
+/* Botones para activar/desactivar estilo (colocados en la esquina) */
+.botones-estilo-pasos {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    background: rgba(255,255,255,0.85);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.botones-estilo-pasos button {
+    margin-left: 8px;
+    padding: 6px 12px;
+    font-size: 0.9em;
+    background-color: #588157;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.botones-estilo-pasos button:hover {
+    background-color: #3a5a40;
+}
+
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .container-registro {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .container-registro h2 {
+        font-size: 1.6em;
+    }
+
+    .container-registro .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .container-registro button,
+    .container-registro input[type="submit"],
+    .container-registro input[type="reset"],
+    .container-registro input[type="button"],
+    .container-registro .btn-action {
+        width: 100%;
+        margin-left: 0; /* Remover margen lateral cuando están apilados */
+        margin-right: 0;
+    }
+
+    .barra-pasos a.paso {
+        padding: 8px 10px;
+        font-size: 0.85em;
+    }
+    .botones-estilo-pasos {
+        padding: 5px;
+        top: 5px;
+        right: 5px;
+    }
+    .botones-estilo-pasos button {
+        padding: 4px 8px;
+        font-size: 0.8em;
+    }
+}

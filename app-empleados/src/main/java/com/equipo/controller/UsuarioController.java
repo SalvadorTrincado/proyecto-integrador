@@ -70,14 +70,9 @@ public class UsuarioController {
             session.setAttribute("usuarioAutenticadoId", nuevoUsuario.getId());
             logger.info("ID de usuario {} guardado en sesión como 'usuarioAutenticadoId'.", nuevoUsuario.getId());
 
-            // Incrementar contador de conexiones válidas (simulando un primer login)
-            // El AutenticacionService.registrarIntentoExitoso lo haría en un flujo normal de login.
-            // Aquí, si es necesario un conteo inmediato, se podría llamar a un método similar o
-            // confiar en que la primera acción autenticada lo registre.
-            // Por simplicidad, asumimos que el PersonalAreaController o el login posterior lo manejarán.
-
-            redirectAttributes.addFlashAttribute("mensajeExitoGlobal", "Cuenta de usuario creada. Por favor, complete su perfil de empleado.");
-            return "redirect:/registro_empleado_paso1"; // Redirigir al primer paso del registro de empleado
+            redirectAttributes.addFlashAttribute("mensajeExitoGlobal", "Cuenta de usuario creada. Ahora puedes completar tu perfil si lo deseas, o acceder a otras funcionalidades.");
+            // MODIFICACIÓN: Redirigir al área personal en lugar del paso 1 del registro de empleado
+            return "redirect:/aplicacion_corporativa/area_personal";
 
         } catch (Exception e) {
             logger.error("Error al registrar o autenticar programáticamente al usuario: {}", e.getMessage());
