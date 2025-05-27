@@ -2,6 +2,8 @@ package com.equipo.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -11,8 +13,9 @@ import java.util.UUID;
 public class Administrador {
 
     @Id // Marca este campo como la clave primaria
-    @GeneratedValue( strategy = GenerationType.AUTO )
-    @Column(name = "id", columnDefinition = "VARCHAR(36)") // Define la columna 'id' como VARCHAR de 36 caracteres
+    @GeneratedValue( strategy = GenerationType.UUID )
+    @Column(name = "id", columnDefinition = "VARCHAR(36)")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id; // Identificador único del administrador (UUID)
 
     @Column(name = "email", nullable = false, unique = true) // Define la columna 'email' como no nula y única

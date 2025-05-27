@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductoResponseDTO {
-    private Long id;
+    private UUID id;
     private String descripcion;
     private Double precio;
     private String marca;

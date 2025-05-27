@@ -8,6 +8,8 @@ import lombok.ToString;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ import java.util.UUID;
 public class Empleado {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
 
     // PASO 1: Datos personales

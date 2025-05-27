@@ -7,6 +7,10 @@ plugins {
 group = 'com.equipo'
 version = '0.0.1-SNAPSHOT'
 
+bootJar {
+    archiveFileName = "${project.name}.jar"
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -41,6 +45,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    runtimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

@@ -3,11 +3,11 @@ package com.equipo.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data; // Se añade Lombok para simplificar
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "productos") // Cambiado de "Producto" a "productos" para seguir convenciones
@@ -15,10 +15,10 @@ import java.util.Set;
 public class Producto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    private UUID id;
 
-    // --- CAMPOS COMUNES REQUERIDOS POR EL PDF ---
     @Column(nullable = false)
     private String descripcion; // [cite: 6, 31]
 
@@ -53,44 +53,26 @@ public class Producto {
             joinColumns = @JoinColumn(name = "producto_id"),
             inverseJoinColumns = @JoinColumn(name = "categoria_id")
     )
-// @JsonBackReference // Si usaste @JsonManagedReference en Categoria.productos
-// O @JsonIgnoreProperties({"productos"}) en la clase Proveedor (si es más simple)
-// O considera usar DTOs para la respuesta de la API (mejor práctica)
     private Set<Categoria> categorias = new HashSet<>();
 
-
-    // --- CAMPOS ESPECÍFICOS (EJEMPLOS) ---
-    // Para tipo Libro
     private String titulo;
     private String autor;
     private String editorial;
-    private String tapa; // Blanda, Dura
+    private String tapa;
     private Integer numeroPaginas;
     private Boolean segundaMano;
 
-    // Para tipo Mueble
     private Double dimensionAncho;
     private Double dimensionProfundo;
     private Double dimensionAlto;
 
-    @ElementCollection // Para lista de colores
+    @ElementCollection
     @CollectionTable(name = "producto_colores", joinColumns = @JoinColumn(name = "producto_id"))
     @Column(name = "color")
     private List<String> colores = new ArrayList<>();
 
-    // Para tipo Ropa (ejemplo)
     private String talla;
     private String material;
-
-
-    // --- ATRIBUTOS ORIGINALES (revisar si se mantienen o se integran) ---
-    // private String nombre; // El PDF usa "descripcion" como principal identificador textual. Si "nombre" es diferente, mantener. Si no, eliminar y usar "descripcion".
-    // Por ahora, lo comento asumiendo que "descripcion" es el campo principal.
-    // private Integer stock; // El PDF usa "unidades". Unificar a "unidades".
-
-    // Constructores, Getters y Setters son generados por Lombok @Data
-    // No es necesario definirlos explícitamente si se usa @Data.
-    // Si no se usa @Data, se deben generar manualmente.
 
     @PrePersist
     protected void onCreate() {
