@@ -1,27 +1,18 @@
 package com.equipo.Configuration;
 
-import com.equipo.service.AutenticacionService;
-// La siguiente importación es la interfaz de Spring Security.
-import org.springframework.security.core.userdetails.UserDetailsService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+// ... otras importaciones ...
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-
-import java.io.IOException;
 
 @Configuration
 public class WebSecurityConfig {
@@ -33,7 +24,7 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http,
-                                                       UserDetailsService userDetailServiceBean, // Spring inyectará AutenticacionService aquí
+                                                       UserDetailsService userDetailServiceBean,
                                                        PasswordEncoder passwordEncoder) throws Exception {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.userDetailsService(userDetailServiceBean).passwordEncoder(passwordEncoder);
@@ -41,7 +32,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationSuccessHandler customAuthenticationSuccessHandler(AutenticacionService autenticacionService) { // Inyecta AutenticacionService
+    public AuthenticationSuccessHandler customAuthenticationSuccessHandler(
+            com.equipo.service.AutenticacionService autenticacionService) { // Asegúrate que esta es tu clase de servicio
         return (request, response, authentication) -> {
             String username = authentication.getName();
             if (username != null) {
@@ -56,26 +48,23 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationFailureHandler customAuthenticationFailureHandler(AutenticacionService autenticacionService) { // Inyecta AutenticacionService
-        return new AuthenticationFailureHandler() {
-            @Override
-            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-                                                AuthenticationException exception) throws IOException, ServletException {
-                String email = request.getParameter("email"); // El 'usernameParameter'
-                String failureUrlKey = "credenciales";
+    public AuthenticationFailureHandler customAuthenticationFailureHandler(
+            com.equipo.service.AutenticacionService autenticacionService) { // Asegúrate que esta es tu clase de servicio
+        return (request, response, exception) -> {
+            String email = request.getParameter("email");
+            String failureUrlKey = "credenciales";
 
-                if (email != null && !email.isEmpty()) {
-                    if (!(exception instanceof LockedException)) {
-                        autenticacionService.registrarIntentoFallido(email);
-                    }
+            if (email != null && !email.isEmpty()) {
+                if (!(exception instanceof org.springframework.security.authentication.LockedException)) {
+                    autenticacionService.registrarIntentoFallido(email);
                 }
-
-                if (exception instanceof LockedException) {
-                    failureUrlKey = "bloqueado";
-                }
-
-                response.sendRedirect(request.getContextPath() + "/autenticacion/paso2?email=" + (email != null ? email : "") + "&error=" + failureUrlKey);
             }
+
+            if (exception instanceof org.springframework.security.authentication.LockedException) {
+                failureUrlKey = "bloqueado";
+            }
+
+            response.sendRedirect(request.getContextPath() + "/autenticacion/paso2?email=" + (email != null ? email : "") + "&error=" + failureUrlKey);
         };
     }
 
@@ -86,44 +75,43 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(
-                                "/css/**", "/js/**", "/h2-console/**", // Recursos estáticos y consola H2
+                                "/css/**", "/js/**", "/h2-console/**",
                                 "/autenticacion/paso1", "/autenticacion/paso1-post",
-                                "/autenticacion/paso2", // Permitir GET a paso2 para mostrar errores
+                                "/autenticacion/paso2",
                                 "/registrar_usuario", "/registrar_usuario_post",
-                                "/recuperar_password", "/forgot-password" // Funcionalidades de recuperación y registro
+                                "/recuperar-password", // Ruta para la vista de recuperación
+                                "/api/password-recovery/**" // Rutas de la API para recuperación
                         ).permitAll()
                         .requestMatchers(
-                                "/aplicacion_corporativa/registro/**", // Pasos del registro de empleado
-                                "/resumen/exito", "/resumen/exito-post", // Resumen y finalización del registro
-                                "/aplicacion_corporativa/area_personal", // Área personal del empleado
-                                "/empleado/nominas/**", // Acceso a las nóminas del empleado
-                                "/empleado/modificar-datos" // NUEVA RUTA para modificar datos del empleado
-                        ).authenticated() // Requieren autenticación
-                        .anyRequest().permitAll() // Por defecto, permite otras rutas no especificadas (ajustar si es necesario a .authenticated())
+                                "/aplicacion_corporativa/registro/**",
+                                "/resumen/exito", "/resumen/exito-post",
+                                "/aplicacion_corporativa/area_personal",
+                                "/empleado/nominas/**",
+                                "/empleado/modificar-datos"
+                        ).authenticated()
+                        .anyRequest().permitAll() // Ajusta según necesidad, podría ser .authenticated()
                 )
                 .formLogin((form) -> form
-                        .loginPage("/autenticacion/paso1") // Página de inicio de sesión (Paso 1)
-                        .loginProcessingUrl("/autenticacion/paso2-post") // URL donde se procesa el login (Paso 2)
-                        .usernameParameter("email") // Nombre del parámetro para el email en el form
-                        .passwordParameter("password") // Nombre del parámetro para la contraseña
-                        .successHandler(successHandler) // Manejador para login exitoso
-                        .failureHandler(failureHandler) // Manejador para login fallido
+                        .loginPage("/autenticacion/paso1")
+                        .loginProcessingUrl("/autenticacion/paso2-post")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .successHandler(successHandler)
+                        .failureHandler(failureHandler)
                         .permitAll()
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/autenticacion/paso1?logout") // Redirigir a paso1 con mensaje de logout
+                        .logoutSuccessUrl("/autenticacion/paso1?logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
                 .csrf((csrf) -> csrf
-                                .ignoringRequestMatchers("/h2-console/**") // Deshabilitar CSRF para H2 console
-                        // Si tienes problemas con POST en otros formularios y no manejas tokens CSRF, podrías añadir .disable() temporalmente
-                        // .disable() // DESCOMENTAR SÓLO PARA PRUEBAS SI ES ESTRICTAMENTE NECESARIO
+                        .ignoringRequestMatchers("/h2-console/**", "/api/**") // Ignorar CSRF para H2 y API REST
                 )
                 .headers((headers) -> headers
-                        .frameOptions((frameOptions) -> frameOptions.sameOrigin()) // Necesario para H2 console
+                        .frameOptions((frameOptions) -> frameOptions.sameOrigin())
                 );
 
         return http.build();

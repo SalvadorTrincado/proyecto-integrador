@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Asegúrate de que esté importado
 
 import java.util.Optional;
 import java.util.UUID;
@@ -67,5 +68,25 @@ public class UsuarioService {
     // Método para actualizar los datos de un usuario
     public Usuario actualizarUsuario(Usuario usuario) {
         return usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Actualiza la contraseña de un usuario dado su email.
+     * @param email El email del usuario.
+     * @param nuevaPassword La nueva contraseña sin encriptar.
+     * @return true si la contraseña fue actualizada, false si el usuario no fue encontrado.
+     */
+    @Transactional
+    public boolean actualizarPasswordPorEmail(String email, String nuevaPassword) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            usuario.setPassword(passwordEncoder.encode(nuevaPassword));
+            usuarioRepository.save(usuario);
+            logger.info("Contraseña actualizada para el usuario: {}", email);
+            return true;
+        }
+        logger.warn("Intento de actualizar contraseña para email no existente: {}", email);
+        return false;
     }
 }
